@@ -18,51 +18,63 @@ module top(
     // PicoRV interface
     // どうしよっか
 );
+    parameter OCT = 8;
+
     parameter PRE = 8'b10101010;
     parameter SFD = 8'b10101011;
 
-    parameter RX_IDLE       = 2'b00;
-    parameter RX_WAIT_SFD   = 2'b01;
-    parameter RX_READ_DATA  = 2'b11;
-    parameter RX_IRQ        = 2'b10;
 
-    reg [7:0] rx_state;
 
-    always @(posedge RX_CLK) begin
-        if(rst) begin
-            rx_state    <= RX_IDLE;
-        end else begin
-            case(rx_state)
-                RX_IDLE : begin
-                    if(RX_DV) begin
-                        rx_state    <= RX_WAIT_SFD;
-                    end else begin
-                        rx_state    <= RX_IDLE;
-                    end
-                end
-                RX_WAIT_SFD : begin
-                    if(RXD == SFD) begin
-                        rx_state    <= RX_GET_DATA;
-                    end else begin
-                        rx_state    <= RX_WAIT_SFD;
-                    end
-                end
-                RX_READ_DATA : begin
-                    // READ FRAME HEADER
-                    // IP
-                        // UDP
-                        // TCP?
-                    // ARP
-                end
-                RX_IRQ : begin
-                    // assert irq
-                end
-                default : begin
-                    rx_state    <= RX_IDLE;
-                end
-            endcase
-        end
-    end
+    // SMI logic
+    // transmit logic
+    // receive logic
+    rx_ethernet rx_ethernet_inst(
+        .RX_CLK (RX_CLK ),
+        .RX_DV  (RX_DV  ),
+        .RXD    (RXD    ),
+        .RX_ER  (RX_ER  ),
+
+        .rx_payload_ip  (),
+        .rx_payload_arp (),
+        .rx_payload     ()
+    );
+
+    // ARP
+    rx_arp      rx_arp_inst(
+        .RX_CLK         (),
+        .rx_payload_arp (),
+        .rx_payload     (),
+    );
+
+    // IP
+    rx_ip       rx_ip_inst(
+        .RX_CLK         (),
+        .rx_payload_ip  (),
+        .rx_payload     (),
+
+        .rx_data_udp    (),
+        .rx_data_tcp    (),
+        .rx_data        ()
+    );
+
+    // UDP
+    rx_udp      rx_udp_inst(
+        .RX_CLK         (),
+        .rx_data_udp    (),
+        .rx_data        (),
+
+        .rx_udp_irq     (),
+        .rx_udp_data    ()
+    );
+    // TCP?
+    rx_udp      rx_udp_inst(
+        .RX_CLK         (),
+        .rx_data_tcp    (),
+        .rx_data        (),
+
+        .rx_tcp_irq     (),
+        .rx_tcp_data    ()
+    );
 
 endmodule
 `default_nettype wire
