@@ -1,3 +1,9 @@
+//
+//  ethernet --- IP ---- UDP
+//            |       |
+//            -- ARP  -- TCP
+//
+
 `default_nettype none
 module top(
     input   wire        rst,
@@ -18,32 +24,32 @@ module top(
     // PicoRV interface
     // どうしよっか
 );
-    parameter OCT = 8;
+    parameter OCT   = 8;
+    parameter PRE   = 8'b10101010;
+    parameter SFD   = 8'b10101011;
+    parameter IPV4  = 16'h0800;
 
-    parameter PRE = 8'b10101010;
-    parameter SFD = 8'b10101011;
-
-
+    // Vthernet CSR
+    reg [OCT*6-1:0] mac_addr;
 
     // SMI logic
     // transmit logic
     // receive logic
-    rx_ethernet rx_ethernet_inst(
-        .RX_CLK (RX_CLK ),
-        .RX_DV  (RX_DV  ),
-        .RXD    (RXD    ),
-        .RX_ER  (RX_ER  ),
+    rx_ethernet #(
+        .OCT    (OCT    ),
+        .PRE    (PRE    ),
+        .SFD    (SFD    ),
+        .IPV4   (IPV4   )
+    ) rx_ethernet_inst(
+        .rst            (rst        ),
+        .mac_addr       (mac_addr   ),
+        .RX_CLK         (RX_CLK     ),
+        .RX_DV          (RX_DV      ),
+        .RXD            (RXD        ),
+        .RX_ER          (RX_ER      ),
 
         .rx_payload_ip  (),
-        .rx_payload_arp (),
         .rx_payload     ()
-    );
-
-    // ARP
-    rx_arp      rx_arp_inst(
-        .RX_CLK         (),
-        .rx_payload_arp (),
-        .rx_payload     (),
     );
 
     // IP
@@ -66,7 +72,18 @@ module top(
         .rx_udp_irq     (),
         .rx_udp_data    ()
     );
+
+    // ARP
+    /*
+    rx_arp      rx_arp_inst(
+        .RX_CLK         (),
+        .rx_payload_arp (),
+        .rx_payload     (),
+    );
+    */
+
     // TCP?
+    /*
     rx_udp      rx_udp_inst(
         .RX_CLK         (),
         .rx_data_tcp    (),
@@ -75,6 +92,7 @@ module top(
         .rx_tcp_irq     (),
         .rx_tcp_data    ()
     );
+    */
 
 endmodule
 `default_nettype wire
