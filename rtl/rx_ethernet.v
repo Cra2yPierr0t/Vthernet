@@ -8,6 +8,7 @@ module rx_ethernet #(
     input   wire        rst,
 
     input   wire [OCT*6-1:0] mac_addr,
+    output  reg             rx_irq, // if completed receive frame, take interrupt
 
     // GMII Receive Interface
     input   wire            RX_CLK,
@@ -16,6 +17,7 @@ module rx_ethernet #(
     input   wire            RX_ER,
 
     // Interface for Next Layer Logic
+    input   wire            rv_irq_ipv4,
     output  reg             rx_payload_ipv4,
     output  reg [OCT-1:0]   rx_payload
 );
@@ -34,13 +36,21 @@ module rx_ethernet #(
     reg [OCT*6-1:0]     rx_mac_src;
     reg [OCT*2-1:0]     rx_len_type;
 
+    reg [1:0] detect_posedge_rx_dv;
+
     always @(posedge RX_CLK) begin
         if(rst) begin
             rx_state    <= RX_IDLE;
+            rx_payload_ipv4 <= 1'b0;
+            rx_irq      <= 1'b0;
+            detect_posedge_edge <= 2'b00;
         end else begin
+            detect_posedge_rx_dv <= {detect_posedge_rx_dv[0], RX_DV};
             case(rx_state)
                 RX_IDLE : begin
-                    if(RX_DV) begin
+                    rx_payload_ipv4 <= 1'b0;
+                    rx_irq <= 1'b0;
+                    if(detect_posedge_rx_dv == 2'b01) begin
                         rx_state    <= RX_WAIT_SFD;
                     end else begin
                         rx_state    <= RX_IDLE;
@@ -56,10 +66,10 @@ module rx_ethernet #(
                 RX_MAC_DST  : begin
                     if(data_cnt == 8'h05) begin
                         data_cnt    <= 16'h0000;
-                        if({rx_mac_dst[OCT*5-1:0], RXD} == mac_addr) begin
+                        if({rx_mac_dst[OCT*5-1:0], RXD} == mac_addr) begin // check mac addr
                             rx_state    <= RX_MAC_SRC;
-                        end else begin
-                            rx_state    <= RX_IDLE; // dame
+                        end else begin // if did not match, return to start
+                            rx_state    <= RX_IDLE;
                         end
                     end else begin
                         rx_state    <= RX_MAC_DST;
@@ -93,6 +103,9 @@ module rx_ethernet #(
                         IPV4    : begin
                             rx_payload_ipv4 <= 1'b1;
                             rx_payload      <= RXD;
+                            if(rx_irq_ipv4) begin
+                                rx_state    <= RX_IRQ;
+                            end
                         end
                         default : begin
                             if(rx_len_type <= 16'h05DC) begin   // RAW FRAME
@@ -104,7 +117,8 @@ module rx_ethernet #(
                     endcase
                 end
                 RX_IRQ : begin
-                    // assert irq
+                    rx_state    <= RX_IDLE;
+                    rx_irq      <= 1'b1;
                 end
                 default : begin
                     rx_state    <= RX_IDLE;
