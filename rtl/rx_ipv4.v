@@ -1,13 +1,17 @@
 `default_nettype none
 module rx_ipv4 #(
-    parameter   OCT = 8
+    parameter   OCT = 8,
+    parameter   UDP = 8'h11
 )(
     input   wire                rst,
+    input   wire    [OCT*4-1:0] ip_addr,
 
     input   wire                RX_CLK,
     input   wire                rx_payload_ipv4,
     input   wire    [OCT-1:0]   rx_payload,
+    output  reg                 rx_irq_ipv4,
 
+    input   wire                rx_irq_udp,
     output  reg                 rx_data_udp,
     output  reg     [OCT-1:0]   rx_data
 );
@@ -105,7 +109,8 @@ module rx_ipv4 #(
                     RX_DST_IP   : begin
                         if(data_cnt == 16'h0003) begin
                             rx_state    <= RX_DATA;
-                            data_cnt    <= 16'h0000;
+                            // for total len cnt
+                            data_cnt    <= {10'b00_0000_0000, rx_header_len, 2'b00};
                         end else begin
                             rx_state    <= RX_DST_IP;
                             data_cnt    <= data_cnt + 16'h0001;
@@ -113,6 +118,28 @@ module rx_ipv4 #(
                         rx_dst_ip <= {rx_dst_ip[OCT*3-1:0], RXD};
                     end
                     RX_DATA     : begin
+                        rx_data <= RXD;
+                        // count data lenght
+                        if(data_cnt == rx_total_len) begin
+                            rx_state    <= RX_IRQ;
+                            data_cnt    <= 16'h0000;
+                        end else begin
+                            data_cnt    <= data_cnt + 16'h0001;
+                        end
+                        case(rx_protocol)
+                            UDP : begin
+                                rx_data_udp <= 1'b1;
+                            end
+                            default : begin
+                                rx_data_udp <= 1'b0;
+                            end
+                        endcase
+                    end
+                    RX_IRQ      : begin
+                        rx_state    <= RX_IHL_VER;
+                        rx_irq_ipv4 <= 1'b1;
+                    end
+                    default : begin
                     end
                 endcase
             end else begin
