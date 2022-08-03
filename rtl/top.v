@@ -48,14 +48,15 @@ module top(
         .RXD            (RXD        ),
         .RX_ER          (RX_ER      ),
 
-        .rx_payload_ip  (),
+        .rx_payload_ipv4(),
         .rx_payload     ()
     );
 
-    // IP
-    rx_ip       rx_ip_inst(
+    // IPv4
+    rx_ipv4     rx_ipv4_inst(
+        .rst            (),
         .RX_CLK         (),
-        .rx_payload_ip  (),
+        .rx_payload_ipv4(),
         .rx_payload     (),
 
         .rx_data_udp    (),

@@ -16,7 +16,7 @@ module rx_ethernet #(
     input   wire            RX_ER,
 
     // Interface for Next Layer Logic
-    output  reg             rx_payload_ip,
+    output  reg             rx_payload_ipv4,
     output  reg [OCT-1:0]   rx_payload
 );
 
@@ -29,7 +29,7 @@ module rx_ethernet #(
     parameter RX_IRQ        = 3'b110;
 
     reg [OCT*2-1:0]     data_cnt;
-    reg [OCT-1:0]       rx_state;
+    reg [2:0]           rx_state;
     reg [OCT*6-1:0]     rx_mac_dst;
     reg [OCT*6-1:0]     rx_mac_src;
     reg [OCT*2-1:0]     rx_len_type;
@@ -91,12 +91,12 @@ module rx_ethernet #(
                     // READ FRAME HEADER
                     case(rx_len_type)
                         IPV4    : begin
-                            rx_payload_ip   <= 1'b1;
+                            rx_payload_ipv4 <= 1'b1;
                             rx_payload      <= RXD;
                         end
                         default : begin
                             if(rx_len_type <= 16'h05DC) begin   // RAW FRAME
-                                rx_payload_ip   <= 1'b0;
+                                rx_payload_ipv4 <= 1'b0;
                             end else begin                      // UNKNOWN TYPE
                                 rx_payload_ip   <= 1'b0;
                             end
