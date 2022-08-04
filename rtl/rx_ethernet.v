@@ -9,6 +9,7 @@ module rx_ethernet #(
 
     input   wire [OCT*6-1:0] mac_addr,
     output  reg             rx_irq, // if completed receive frame, take interrupt
+    output  reg [OCT*6-1:0] rx_mac_src,
 
     // GMII Receive Interface
     input   wire            RX_CLK,
@@ -17,7 +18,6 @@ module rx_ethernet #(
     input   wire            RX_ER,
 
     // Interface for Next Layer Logic
-    input   wire            rv_irq_ipv4,
     output  reg             rx_payload_ipv4,
     output  reg [OCT-1:0]   rx_payload
 );
@@ -33,7 +33,6 @@ module rx_ethernet #(
     reg [OCT*2-1:0]     data_cnt;
     reg [2:0]           rx_state;
     reg [OCT*6-1:0]     rx_mac_dst;
-    reg [OCT*6-1:0]     rx_mac_src;
     reg [OCT*2-1:0]     rx_len_type;
 
     reg [1:0] detect_posedge_rx_dv;

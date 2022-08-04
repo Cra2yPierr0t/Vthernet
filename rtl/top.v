@@ -20,9 +20,11 @@ module top(
     input   wire        RX_ER,
 
     output  reg         MDC,
-    inout   reg         MDIO
+    inout   reg         MDIO,
     // PicoRV interface
-    // どうしよっか
+    output  wire        rx_irq,
+    output  wire        rx_udp_data_v,
+    output  wire [7:0]  rx_udp_data
 );
     parameter OCT   = 8;
     parameter PRE   = 8'b10101010;
@@ -31,10 +33,22 @@ module top(
 
     // Vthernet CSR
     reg [OCT*6-1:0] mac_addr;
+    reg [OCT*4-1:0] ip_addr;
+    reg [OCT*2-1:0] port;
+
+    wire [OCT*6-1:0] rx_mac_src;
+    wire [OCT*4-1:0] rx_src_ip;
+    wire [OCT*2-1:0] rx_src_port;
 
     // SMI logic
     // transmit logic
     // receive logic
+    
+    wire                rx_payload_ipv4;
+    wire    [OCT-1:0]   rx_payload;
+    wire                rx_data_udp;
+    wire    [OCT-1:0]   rx_data;
+
     rx_ethernet #(
         .OCT    (OCT    ),
         .PRE    (PRE    ),
@@ -43,57 +57,39 @@ module top(
     ) rx_ethernet_inst(
         .rst            (rst        ),
         .mac_addr       (mac_addr   ),
+        .rx_irq         (rx_irq     ),
+        .rx_mac_src     (rx_mac_src ),
         .RX_CLK         (RX_CLK     ),
         .RX_DV          (RX_DV      ),
         .RXD            (RXD        ),
         .RX_ER          (RX_ER      ),
-
-        .rx_payload_ipv4(),
-        .rx_payload     ()
+        .rx_payload_ipv4(rx_payload_ipv4    ),
+        .rx_payload     (rx_payload         )
     );
 
     // IPv4
     rx_ipv4     rx_ipv4_inst(
-        .rst            (),
-        .RX_CLK         (),
-        .rx_payload_ipv4(),
-        .rx_payload     (),
-
-        .rx_data_udp    (),
-        .rx_data_tcp    (),
-        .rx_data        ()
+        .rst            (rst            ),
+        .ip_addr        (ip_addr        ),
+        .rx_src_ip      (rx_src_ip      ),
+        .RX_CLK         (RX_CLK         ),
+        .rx_payload_ipv4(rx_payload_ipv4),
+        .rx_payload     (rx_payload     ),
+        .rx_data_udp    (rx_data_udp    ),
+        .rx_data        (rx_data        )
     );
 
     // UDP
     rx_udp      rx_udp_inst(
-        .RX_CLK         (),
-        .rx_data_udp    (),
-        .rx_data        (),
-
-        .rx_udp_irq     (),
-        .rx_udp_data    ()
+        .rst            (rst            ),
+        .port           (port           ),
+        .rx_src_port    (rx_src_port    ),
+        .RX_CLK         (RX_CLK         ),
+        .rx_data_v      (rx_data_udp    ),
+        .rx_data        (rx_data        ),
+        .rx_udp_data_v  (rx_udp_data_v  ),
+        .rx_udp_data    (rx_udp_data    )
     );
-
-    // ARP
-    /*
-    rx_arp      rx_arp_inst(
-        .RX_CLK         (),
-        .rx_payload_arp (),
-        .rx_payload     (),
-    );
-    */
-
-    // TCP?
-    /*
-    rx_udp      rx_udp_inst(
-        .RX_CLK         (),
-        .rx_data_tcp    (),
-        .rx_data        (),
-
-        .rx_tcp_irq     (),
-        .rx_tcp_data    ()
-    );
-    */
 
 endmodule
 `default_nettype wire

@@ -5,13 +5,12 @@ module rx_ipv4 #(
 )(
     input   wire                rst,
     input   wire    [OCT*4-1:0] ip_addr,
+    output  reg     [OCT*4-1:0] rx_src_ip,
 
     input   wire                RX_CLK,
     input   wire                rx_payload_ipv4,
     input   wire    [OCT-1:0]   rx_payload,
-    output  reg                 rx_irq_ipv4,
 
-    input   wire                rx_irq_udp,
     output  reg                 rx_data_udp,
     output  reg     [OCT-1:0]   rx_data
 );
@@ -120,12 +119,6 @@ module rx_ipv4 #(
                     RX_DATA     : begin
                         rx_data <= RXD;
                         // count data lenght
-                        if(data_cnt == rx_total_len) begin
-                            rx_state    <= RX_IRQ;
-                            data_cnt    <= 16'h0000;
-                        end else begin
-                            data_cnt    <= data_cnt + 16'h0001;
-                        end
                         case(rx_protocol)
                             UDP : begin
                                 rx_data_udp <= 1'b1;
@@ -135,11 +128,8 @@ module rx_ipv4 #(
                             end
                         endcase
                     end
-                    RX_IRQ      : begin
-                        rx_state    <= RX_IHL_VER;
-                        rx_irq_ipv4 <= 1'b1;
-                    end
                     default : begin
+                        rx_data_udp <= 1'b0;
                     end
                 endcase
             end else begin
