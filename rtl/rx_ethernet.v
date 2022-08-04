@@ -101,17 +101,21 @@ module rx_ethernet #(
                     // READ FRAME HEADER
                     case(rx_len_type)
                         IPV4    : begin
-                            rx_payload_ipv4 <= 1'b1;
                             rx_payload      <= RXD;
-                            if(rx_irq_ipv4) begin
-                                rx_state    <= RX_IRQ;
+                            if(RX_DV) begin
+                                rx_state        <= RX_READ_DATA;
+                                rx_payload_ipv4 <= 1'b1;
+                            end else begin
+                                rx_state        <= RX_IRQ;
+                                rx_payload_ipv4 <= 1'b0;
                             end
                         end
                         default : begin
+                            rx_state    <= RX_IDLE;
                             if(rx_len_type <= 16'h05DC) begin   // RAW FRAME
                                 rx_payload_ipv4 <= 1'b0;
                             end else begin                      // UNKNOWN TYPE
-                                rx_payload_ip   <= 1'b0;
+                                rx_payload_ipv4 <= 1'b0;
                             end
                         end
                     endcase
