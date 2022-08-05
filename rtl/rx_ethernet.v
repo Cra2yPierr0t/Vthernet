@@ -73,8 +73,8 @@ module rx_ethernet #(
                     end else begin
                         rx_state    <= RX_MAC_DST;
                         data_cnt    <= data_cnt + 16'h0001;
-                        rx_mac_dst  <= {rx_mac_dst[OCT*5-1:0], RXD};
                     end
+                    rx_mac_dst  <= {rx_mac_dst[OCT*5-1:0], RXD};
                 end
                 RX_MAC_SRC  : begin
                     if(data_cnt == 8'h05) begin
@@ -84,7 +84,7 @@ module rx_ethernet #(
                         rx_state    <= RX_MAC_SRC;
                         data_cnt    <= data_cnt + 16'h0001;
                     end
-                    rx_mac_dst  <= {rx_mac_dst[OCT*5-1:0], RXD};
+                    rx_mac_src  <= {rx_mac_src[OCT*5-1:0], RXD};
                 end
                 RX_LEN_TYPE : begin
                     if(data_cnt == 8'h01) begin
