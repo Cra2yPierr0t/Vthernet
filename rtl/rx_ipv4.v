@@ -52,7 +52,7 @@ module rx_ipv4 #(
                 case(rx_state)
                     RX_IHL_VER  : begin
                         rx_state    <= RX_TOS;
-                        {rx_header_len, rx_version} <= rx_payload;
+                        {rx_version, rx_header_len} <= rx_payload;
                     end
                     RX_TOS      : begin
                         rx_state    <= RX_TOTAL_LEN;
