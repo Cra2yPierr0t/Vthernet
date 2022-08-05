@@ -32,8 +32,8 @@ module top(
     parameter IPV4  = 16'h0800;
 
     // Vthernet CSR
-    reg [OCT*6-1:0] mac_addr;
-    reg [OCT*4-1:0] ip_addr;
+    reg [OCT*6-1:0] mac_addr = 48'h01005e0000fb;
+    reg [OCT*4-1:0] ip_addr  = 32'he00000fb;
     reg [OCT*2-1:0] port;
 
     wire [OCT*6-1:0] rx_mac_src;
