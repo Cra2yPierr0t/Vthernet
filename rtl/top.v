@@ -21,6 +21,7 @@ module top(
 
     output  reg         MDC,
     inout   reg         MDIO,
+
     // PicoRV interface
     output  wire        rx_irq,
     output  wire        rx_udp_data_v,
@@ -49,6 +50,12 @@ module top(
     wire                rx_data_udp;
     wire    [OCT-1:0]   rx_data;
 
+    // receive irq signal
+    wire                rx_ethernet_irq;
+    wire                rx_ipv4_irq;
+    wire                rx_udp_irq;
+    assign rx_irq = rx_udp_irq;
+
     rx_ethernet #(
         .OCT    (OCT    ),
         .PRE    (PRE    ),
@@ -57,7 +64,7 @@ module top(
     ) rx_ethernet_inst(
         .rst            (rst        ),
         .mac_addr       (mac_addr   ),
-        .rx_irq         (rx_irq     ),
+        .rx_ethernet_irq(rx_ethernet_irq   ),
         .rx_mac_src     (rx_mac_src ),
         .RX_CLK         (RX_CLK     ),
         .RX_DV          (RX_DV      ),
@@ -72,6 +79,8 @@ module top(
         .rst            (rst            ),
         .ip_addr        (ip_addr        ),
         .rx_src_ip      (rx_src_ip      ),
+        .rx_ethernet_irq(rx_ethernet_irq),
+        .rx_ipv4_irq    (rx_ipv4_irq    ),
         .RX_CLK         (RX_CLK         ),
         .rx_payload_ipv4(rx_payload_ipv4),
         .rx_payload     (rx_payload     ),
@@ -84,6 +93,8 @@ module top(
         .rst            (rst            ),
         .port           (port           ),
         .rx_src_port    (rx_src_port    ),
+        .rx_ipv4_irq    (rx_ipv4_irq    ),
+        .rx_udp_irq     (rx_udp_irq     ),
         .RX_CLK         (RX_CLK         ),
         .rx_data_v      (rx_data_udp    ),
         .rx_data        (rx_data        ),

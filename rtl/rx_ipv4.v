@@ -6,6 +6,8 @@ module rx_ipv4 #(
     input   wire                rst,
     input   wire    [OCT*4-1:0] ip_addr,
     output  reg     [OCT*4-1:0] rx_src_ip,
+    input   wire                rx_ethernet_irq,
+    output  reg                 rx_ipv4_irq,
 
     input   wire                RX_CLK,
     input   wire                rx_payload_ipv4,
@@ -47,7 +49,9 @@ module rx_ipv4 #(
         if(rst) begin
             rx_state    <= RX_IHL_VER;
             data_cnt    <= 16'h0000;
+            rx_ipv4_irq <= 1'b0;
         end else begin
+            rx_ipv4_irq <= rx_ethernet_irq;
             if(rx_payload_ipv4) begin
                 case(rx_state)
                     RX_IHL_VER  : begin

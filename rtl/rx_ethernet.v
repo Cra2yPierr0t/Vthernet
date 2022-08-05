@@ -8,7 +8,7 @@ module rx_ethernet #(
     input   wire        rst,
 
     input   wire [OCT*6-1:0] mac_addr,
-    output  reg             rx_irq, // if completed receive frame, take interrupt
+    output  reg             rx_ethernet_irq, // if completed receive frame, take interrupt
     output  reg [OCT*6-1:0] rx_mac_src,
 
     // GMII Receive Interface
@@ -41,14 +41,14 @@ module rx_ethernet #(
         if(rst) begin
             rx_state    <= RX_IDLE;
             rx_payload_ipv4 <= 1'b0;
-            rx_irq      <= 1'b0;
+            rx_ethernet_irq <= 1'b0;
             detect_posedge_rx_dv <= 2'b00;
         end else begin
             detect_posedge_rx_dv <= {detect_posedge_rx_dv[0], RX_DV};
             case(rx_state)
                 RX_IDLE : begin
                     rx_payload_ipv4 <= 1'b0;
-                    rx_irq <= 1'b0;
+                    rx_ethernet_irq <= 1'b0;
                     if(detect_posedge_rx_dv == 2'b01) begin
                         rx_state    <= RX_WAIT_SFD;
                     end else begin
@@ -121,7 +121,7 @@ module rx_ethernet #(
                 end
                 RX_IRQ : begin
                     rx_state    <= RX_IDLE;
-                    rx_irq      <= 1'b1;
+                    rx_ethernet_irq <= 1'b1;
                 end
                 default : begin
                     rx_state    <= RX_IDLE;

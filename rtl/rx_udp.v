@@ -5,6 +5,8 @@ module rx_udp #(
     input   wire                rst,
     input   wire    [OCT*2-1:0] port,
     output  reg     [OCT*2-1:0] rx_src_port,
+    input   wire                rx_ipv4_irq,
+    output  reg                 rx_udp_irq,
 
     input   wire                RX_CLK,
     input   wire                rx_data_v,
@@ -32,7 +34,9 @@ module rx_udp #(
         if(rst) begin
             data_cnt    <= 16'h0000;
             rx_udp_data_v   <= 1'b0;
+            rx_udp_irq  <= 1'b0;
         end else begin
+            rx_udp_irq  <= rx_ipv4_irq;
             if(rx_data_v) begin
                 case(rx_state)
                     SRC_PORT : begin
