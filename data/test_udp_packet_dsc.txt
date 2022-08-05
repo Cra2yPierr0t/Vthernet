@@ -1,0 +1,7 @@
+dsc mac : 01:00:5e:00:00:fb
+src mac : d8:eb:46:9d:e5:f3
+dst ip  : 224.0.0.251
+src ip  : 192.168.0.17
+dst port: 5353
+src port: 5353
+checksum: 0xc476
