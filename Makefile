@@ -1,7 +1,7 @@
 rtl_dir = ./rtl/
 tb_dir	= ./tb/
 
-rtl	= $(rtl_dir)rx_ethernet.v $(rtl_dir)rx_ipv4.v $(rtl_dir)rx_udp.v
+rtl	= $(rtl_dir)rx_ethernet.v $(rtl_dir)rx_ipv4.v $(rtl_dir)rx_udp.v $(rtl_dir)wb_interface.v
 tb 	= $(tb_dir)receive_tb.cpp
 
 receive_test:
