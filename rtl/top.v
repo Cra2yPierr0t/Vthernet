@@ -81,7 +81,7 @@ module top(
                         end else begin
                             wb_state <= WB_READ;
                         end
-                        wb_addr <= wb_adr_i;
+                        wb_addr <= wbs_adr_i;
                     end
                     wbs_ack_o   <= 1'b0;
                 end
@@ -110,7 +110,7 @@ module top(
                         end else begin
                             wb_state <= WB_READ;
                         end
-                        wb_addr <= wb_adr_i;
+                        wb_addr <= wbs_adr_i;
                     end else begin
                         wb_state <= WB_IDLE;
                     end
@@ -140,7 +140,7 @@ module top(
                         end else begin
                             wb_state <= WB_READ;
                         end
-                        wb_addr <= wb_adr_i;
+                        wb_addr <= wbs_adr_i;
                     end else begin
                         wb_state <= WB_IDLE;
                     end
