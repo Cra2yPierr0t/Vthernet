@@ -26,7 +26,6 @@ module rx_ipv4 #(
     reg [OCT-1:0]   rx_ttl;
     reg [OCT-1:0]   rx_protocol;
     reg [OCT-1:0]   rx_checksum;
-    reg [OCT*4-1:0] rx_src_ip;
     reg [OCT*4-1:0] rx_dst_ip;
     //reg [OCT*36-1:0] rx_option;
     
@@ -41,7 +40,7 @@ module rx_ipv4 #(
                 case(rx_state)
                     RX_IHL_VER  : begin
                         rx_state    <= RX_TOS;
-                        {rx_head_len, rx_version} <= RXD;
+                        {rx_head_len, rx_version} <= rx_payload;
                     end
                     RX_TOS      : begin
                         rx_state    <= RX_TOTAL_LEN;
@@ -55,7 +54,7 @@ module rx_ipv4 #(
                             rx_state    <= RX_TOTAL_LEN;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_total_len <= {rx_total_len[OCT-1:0], RXD};
+                        rx_total_len <= {rx_total_len[OCT-1:0], rx_payload};
                     end
                     RX_ID       : begin
                         if(data_cnt == 16'h0001) begin
@@ -65,7 +64,7 @@ module rx_ipv4 #(
                             rx_state    <= RX_ID;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_id <= {rx_id[OCT-1:0], RXD};
+                        rx_id <= {rx_id[OCT-1:0], rx_payload};
                     end
                     RX_FLAG_FRAG: begin
                         if(data_cnt == 16'h0001) begin
@@ -75,15 +74,15 @@ module rx_ipv4 #(
                             rx_state    <= RX_FLAG_FRAG;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_flag_frag <= {rx_flag_frag[OCT-1:0], RXD};
+                        rx_flag_frag <= {rx_flag_frag[OCT-1:0], rx_payload};
                     end
                     RX_TTL      : begin
                         rx_state    <= RX_PROTOCOL;
-                        rx_ttl      <= RXD;
+                        rx_ttl      <= rx_payload;
                     end
                     RX_PROTOCOL : begin
                         rx_state    <= RX_CHECKSUM;
-                        rx_protocol <= RXD;
+                        rx_protocol <= rx_payload;
                     end
                     RX_CHECKSUM : begin
                         if(data_cnt == 16'h0001) begin
@@ -93,7 +92,7 @@ module rx_ipv4 #(
                             rx_state    <= RX_CHECKSUM;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_checksum <= {rx_checksum[OCT-1:0], RXD};
+                        rx_checksum <= {rx_checksum[OCT-1:0], rx_payload};
                     end
                     RX_SRC_IP   : begin
                         if(data_cnt == 16'h0003) begin
@@ -103,7 +102,7 @@ module rx_ipv4 #(
                             rx_state    <= RX_SRC_IP;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_src_ip <= {rx_src_ip[OCT*3-1:0], RXD};
+                        rx_src_ip <= {rx_src_ip[OCT*3-1:0], rx_payload};
                     end
                     RX_DST_IP   : begin
                         if(data_cnt == 16'h0003) begin
@@ -114,10 +113,10 @@ module rx_ipv4 #(
                             rx_state    <= RX_DST_IP;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_dst_ip <= {rx_dst_ip[OCT*3-1:0], RXD};
+                        rx_dst_ip <= {rx_dst_ip[OCT*3-1:0], rx_payload};
                     end
                     RX_DATA     : begin
-                        rx_data <= RXD;
+                        rx_data <= rx_payload;
                         // count data lenght
                         case(rx_protocol)
                             UDP : begin
