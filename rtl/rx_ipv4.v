@@ -34,7 +34,7 @@ module rx_ipv4 #(
     reg [OCT-1:0]   rx_tos;
     reg [OCT*2-1:0] rx_total_len;
     reg [OCT-1:0]   rx_id;
-    reg [OCT*2-1:0] rx_flag_fragment;
+    reg [OCT*2-1:0] rx_flag_frag;
     reg [OCT-1:0]   rx_ttl;
     reg [OCT-1:0]   rx_protocol;
     reg [OCT-1:0]   rx_checksum;
@@ -48,15 +48,15 @@ module rx_ipv4 #(
             rx_state    <= RX_IHL_VER;
             data_cnt    <= 16'h0000;
         end else begin
-            if(rx_data_ipv4) begin
+            if(rx_payload_ipv4) begin
                 case(rx_state)
                     RX_IHL_VER  : begin
                         rx_state    <= RX_TOS;
-                        {rx_head_len, rx_version} <= rx_payload;
+                        {rx_header_len, rx_version} <= rx_payload;
                     end
                     RX_TOS      : begin
                         rx_state    <= RX_TOTAL_LEN;
-                        rx_tos      <= RXD;
+                        rx_tos      <= rx_payload;
                     end
                     RX_TOTAL_LEN: begin
                         if(data_cnt == 16'h0001) begin
