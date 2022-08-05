@@ -28,7 +28,7 @@ module rx_ethernet #(
     parameter RX_MAC_SRC    = 3'b111;
     parameter RX_LEN_TYPE   = 3'b110;
     parameter RX_READ_DATA  = 3'b100;
-    parameter RX_IRQ        = 3'b110;
+    parameter RX_IRQ        = 3'b101;
 
     reg [OCT*2-1:0]     data_cnt;
     reg [2:0]           rx_state;
