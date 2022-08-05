@@ -3,7 +3,7 @@ module rx_udp #(
     parameter   OCT = 8
 )(
     input   wire                rst,
-    input   wire    [OCT*2-1]   port,
+    input   wire    [OCT*2-1:0] port,
     output  reg     [OCT*2-1:0] rx_src_port,
 
     input   wire                RX_CLK,
@@ -14,15 +14,21 @@ module rx_udp #(
     output  reg     [OCT-1:0]   rx_udp_data
 );
 
+    parameter SRC_PORT = 3'b000;
+    parameter DST_PORT = 3'b001;
+    parameter DATA_LEN = 3'b011;
+    parameter CHECKSUM = 3'b111;
+    parameter UDP_DATA = 3'b110;
+
     reg [OCT*2-1:0] data_cnt;
 
-    reg [OCT-1:0]   rx_state;
+    reg [2:0]   rx_state;
 
     reg [OCT*2-1:0] rx_dst_port;
     reg [OCT*2-1:0] rx_data_len;
     reg [OCT*2-1:0] rx_checksum;
 
-    always @(posedge clk) begin
+    always @(posedge RX_CLK) begin
         if(rst) begin
             data_cnt    <= 16'h0000;
             rx_udp_data_v   <= 1'b0;
