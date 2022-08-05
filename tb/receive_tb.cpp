@@ -41,6 +41,20 @@ int main(int argc, char **argv){
     top->rst = 0;
     top->RX_CLK = 0;
 
+    for(int i = 0; i < 10; i++) {
+        top->RX_CLK = 0;
+        top->RXD    = 0;
+        top->RX_DV  = 0;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        top->RX_CLK = 1;
+
+        top->eval();
+        tfp->dump(main_time++);
+    }
+
     for(int i = 0; i < 5; i++) {
         top->RX_CLK = 0;
         top->RXD    = PRE;
@@ -71,6 +85,20 @@ int main(int argc, char **argv){
         top->RX_CLK = 0;
         top->RXD    = frame[i];
         top->RX_DV  = 1;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        top->RX_CLK = 1;
+
+        top->eval();
+        tfp->dump(main_time++);
+    }
+
+    for(int i = 0; i < 10; i++) {
+        top->RX_CLK = 0;
+        top->RXD    = 0;
+        top->RX_DV  = 0;
 
         top->eval();
         tfp->dump(main_time++);
