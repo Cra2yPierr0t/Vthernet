@@ -1,5 +1,6 @@
 `default_nettype none
 module wb_interface #(
+    parameter OCT               = 8,
     parameter MY_MAC_ADDR_LOW   = 32'h3000_0000,
     parameter MY_MAC_ADDR_HIGH  = 32'h3000_0004,
     parameter MY_IP_ADDR        = 32'h3000_0008,
