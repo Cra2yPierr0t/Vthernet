@@ -43,7 +43,7 @@ module rx_udp #(
                             rx_state    <= SRC_PORT;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_src_port <= {rx_src_port[OCT-1:0], RXD};
+                        rx_src_port <= {rx_src_port[OCT-1:0], rx_data};
                     end
                     DST_PORT : begin
                         if(data_cnt == 16'h0001) begin
@@ -53,7 +53,7 @@ module rx_udp #(
                             rx_state    <= DST_PORT;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_dst_port <= {rx_dst_port[OCT-1:0], RXD};
+                        rx_dst_port <= {rx_dst_port[OCT-1:0], rx_data};
                     end
                     DATA_LEN : begin
                         if(data_cnt == 16'h0001) begin
@@ -63,7 +63,7 @@ module rx_udp #(
                             rx_state    <= DATA_LEN;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_data_len <= {rx_data_len[OCT-1:0], RXD};
+                        rx_data_len <= {rx_data_len[OCT-1:0], rx_data};
                     end
                     CHECKSUM : begin
                         if(data_cnt == 16'h0001) begin
@@ -73,7 +73,7 @@ module rx_udp #(
                             rx_state    <= CHECKSUM;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_checksum <= {rx_checksum[OCT-1:0], RXD};
+                        rx_checksum <= {rx_checksum[OCT-1:0], rx_data};
                     end
                     UDP_DATA : begin
                         if(data_cnt == rx_data_len) begin
