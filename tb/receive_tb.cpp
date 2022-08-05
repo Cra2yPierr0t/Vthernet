@@ -22,9 +22,9 @@ int main(int argc, char **argv){
 
     std::vector<uint8_t> frame;
 
-    while(ifs >> str_buf) {
-        std::cout << str_buf << std::endl;
-        frame.push_back(std::stoi(str_buf, nullptr, 16));
+    ifs >> str_buf;
+    for(int i = 0; i < str_buf.size(); i += 2) {
+        frame.push_back(std::stoi(str_buf.substr(i, 2), nullptr, 16));
     }
 
     Verilated::commandArgs(argc, argv);
