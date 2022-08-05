@@ -15,6 +15,18 @@ module rx_ipv4 #(
     output  reg     [OCT-1:0]   rx_data
 );
 
+    parameter RX_IHL_VAR    = 8'b00000001;
+    parameter RX_TOS        = 8'b00000011;
+    parameter RX_TOTAL_LEN  = 8'b00000111;
+    parameter RX_ID         = 8'b00001111;
+    parameter RX_FLAG_FRAG  = 8'b00011111;
+    parameter RX_TTL        = 8'b00011110;
+    parameter RX_PROTOCOL   = 8'b00011100;
+    parameter RX_CHECKSUM   = 8'b00011000;
+    parameter RX_SRC_IP     = 8'b00010000;
+    parameter RX_DST_IP     = 8'b00000000;
+    parameter RX_DATA       = 8'b00000010;
+
     reg [OCT-1:0]   rx_state;
 
     reg [3:0]       rx_version;
