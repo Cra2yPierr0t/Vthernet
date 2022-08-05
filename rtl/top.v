@@ -44,110 +44,37 @@ module top(
     parameter IPV4  = 16'h0800;
 
     // Vthernet CSR
-    reg [OCT*6-1:0] mac_addr = 48'h01005e0000fb;
-    reg [OCT*4-1:0] ip_addr  = 32'he00000fb;
-    reg [OCT*2-1:0] port;
+    wire [OCT*6-1:0] mac_addr;
+    wire [OCT*4-1:0] ip_addr;
+    wire [OCT*2-1:0] port;
 
     wire [OCT*6-1:0] rx_mac_src;
     wire [OCT*4-1:0] rx_src_ip;
     wire [OCT*2-1:0] rx_src_port;
 
     // Wishbone logic
-    parameter MY_MAC_ADDR_LOW   = 32'h3000_0000;
-    parameter MY_MAC_ADDR_HIGH  = 32'h3000_0004;
-    parameter MY_IP_ADDR        = 32'h3000_0008;
-    parameter MY_PORT           = 32'h3000_000c;
-    
-    // wishbone signal
-    parameter WB_IDLE   = 2'b00;
-    parameter WB_WRITE  = 2'b01;
-    parameter WB_READ   = 2'b11;
-
-    reg [1:0]   wb_state;
-    reg [31:0]  wb_addr;
-    reg [31:0]  wb_w_data;
-
-    always @(posedge wb_clk_i) begin
-        if(wb_rst_i) begin
-            wb_state    <= WB_IDLE;
-            wbs_ack_o   <= 1'b0;
-        end else begin
-            case(wb_state)
-                WB_IDLE : begin
-                    if(wbs_stb_i && wbs_cyc_i) begin
-                        if(wbs_we_i) begin
-                            wb_state    <= WB_WRITE;
-                            wb_w_data   <= wbs_dat_i;
-                        end else begin
-                            wb_state <= WB_READ;
-                        end
-                        wb_addr <= wbs_adr_i;
-                    end
-                    wbs_ack_o   <= 1'b0;
-                end
-                WB_WRITE: begin
-                    case(wb_addr)
-                        MY_MAC_ADDR_LOW : begin
-                            mac_addr[OCT*4-1:0] <= wb_w_data;
-                        end
-                        MY_MAC_ADDR_HIGH: begin
-                            mac_addr[OCT*6-1:OCT*4] <= wb_w_data;
-                        end
-                        MY_IP_ADDR  : begin
-                            ip_addr     <= wb_w_data;
-                        end
-                        MY_PORT     : begin
-                            port        <= wb_w_data;
-                        end
-                        default     : begin
-                        end
-                    endcase
-                    wbs_ack_o   <= 1'b1;
-                    if(wbs_stb_i && wbs_cyc_i) begin
-                        if(wbs_we_i) begin
-                            wb_state    <= WB_WRITE;
-                            wb_w_data   <= wbs_dat_i;
-                        end else begin
-                            wb_state <= WB_READ;
-                        end
-                        wb_addr <= wbs_adr_i;
-                    end else begin
-                        wb_state <= WB_IDLE;
-                    end
-                end
-                WB_READ : begin
-                    case(wb_addr)
-                        MY_MAC_ADDR_LOW : begin
-                            wbs_dat_o   <= mac_addr[OCT*4-1:0];
-                        end
-                        MY_MAC_ADDR_HIGH: begin
-                            wbs_dat_o   <= {16'h0000, mac_addr[OCT*6-1:OCT*4]};
-                        end
-                        MY_IP_ADDR  : begin
-                            wbs_dat_o   <= ip_addr;
-                        end
-                        MY_PORT     : begin
-                            wbs_dat_o   <= ip_addr;
-                        end
-                        default     : begin
-                        end
-                    endcase
-                    wbs_ack_o   <= 1'b1;
-                    if(wbs_stb_i && wbs_cyc_i) begin
-                        if(wbs_we_i) begin
-                            wb_state    <= WB_WRITE;
-                            wb_w_data   <= wbs_dat_i;
-                        end else begin
-                            wb_state <= WB_READ;
-                        end
-                        wb_addr <= wbs_adr_i;
-                    end else begin
-                        wb_state <= WB_IDLE;
-                    end
-                end
-            endcase
-        end
-    end
+    wb_interface #(
+        // CSRs addr
+        .MY_MAC_ADDR_LOW    (32'h3000_0000),
+        .MY_MAC_ADDR_HIGH   (32'h3000_0004),
+        .MY_IP_ADDR         (32'h3000_0008),
+        .MY_PORT            (32'h3000_000c)
+    ) wb_interface_inst(
+        .wb_clk_i   (wb_clk_i   ),
+        .wb_rst_i   (wb_rst_i   ),
+        .wbs_stb_i  (wbs_stb_i  ),
+        .wbs_cyc_i  (wbs_cyc_i  ),
+        .wbs_we_i   (wbs_we_i   ),
+        .wbs_sel_i  (wbs_sel_i  ),
+        .wbs_dat_i  (wbs_dat_i  ),
+        .wbs_adr_i  (wbs_adr_i  ),
+        .wbs_ack_o  (wbs_ack_o  ),
+        .wbs_dat_o  (wbs_dat_o  ),
+        // CSRs
+        .mac_addr   (mac_addr   ),
+        .ip_addr    (ip_addr    ),
+        .port       (port       )
+    );
 
     // SMI logic
     // transmit logic
