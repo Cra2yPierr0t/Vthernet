@@ -42,7 +42,7 @@ module rx_ethernet #(
             rx_state    <= RX_IDLE;
             rx_payload_ipv4 <= 1'b0;
             rx_irq      <= 1'b0;
-            detect_posedge_edge <= 2'b00;
+            detect_posedge_rx_dv <= 2'b00;
         end else begin
             detect_posedge_rx_dv <= {detect_posedge_rx_dv[0], RX_DV};
             case(rx_state)
@@ -57,7 +57,7 @@ module rx_ethernet #(
                 end
                 RX_WAIT_SFD : begin
                     if(RXD == SFD) begin
-                        rx_state    <= RX_GET_DATA;
+                        rx_state    <= RX_MAC_DST;
                     end else begin
                         rx_state    <= RX_WAIT_SFD;
                     end
