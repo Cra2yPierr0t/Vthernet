@@ -11,6 +11,9 @@ receive_test:
 run:
 	./obj_dir/Vtop
 
+view: 
+	gtkwave wave.vcd
+
 clean:
 	rm -r obj_dir
 	rm wave.vcd
