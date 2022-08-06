@@ -109,6 +109,40 @@ int main(int argc, char **argv){
         tfp->dump(main_time++);
     }
 
+    top->wb_clk_i   = 0;
+    top->wbs_stb_i  = 1;
+    top->wbs_cyc_i  = 1;
+    top->wbs_we_i   = 0;
+
+    for(uint32_t i = 0; i < 30; i++) {
+        top->wb_clk_i   = 0;
+        top->wbs_adr_i  = 0x40000000 + i;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        top->wb_clk_i   = 1;
+        top->wbs_adr_i  = 0x40000000 + i;
+
+        top->eval();
+        tfp->dump(main_time++);
+    }
+
+    for(int i = 0; i < 10; i++) {
+        top->wb_clk_i   = 0;
+        top->wbs_stb_i  = 0;
+        top->wbs_cyc_i  = 0;
+        top->wbs_we_i   = 0;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        top->wb_clk_i   = 1;
+
+        top->eval();
+        tfp->dump(main_time++);
+    }
+
     tfp->close();
     top->final();
 }
