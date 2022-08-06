@@ -53,23 +53,42 @@ module top(
     wire [OCT*2-1:0] rx_src_port;
 
     // RX Memory
-    reg [7:0]       rx_mem_out;
+    wire [7:0]      dout0;  // tmp
+    wire [7:0]      rx_mem_out;
     reg [10:0]      rx_addr;
-    reg [OCT-1:0]   rx_mem[1500-1:0];
+    // write    : when web0 = 0, csb0 = 0
+    // read     : when web0 = 1, csb0 = 0, maybe 3 clock delay...?
+    // read     : when csb0 = 0, maybe 3 clock delay...?
+    sky130_sram_1kbyte_1rw1r_8x1024_8 rx_mem(
+    `ifdef USE_POWER_PINS
+        .vccd1  (vccd1          ),
+        .vssd1  (vssd1          ),
+    `endif
+        // RW
+        .clk0   (RX_CLK         ), // clock
+        .csb0   (~rx_udp_data_v ), // active low chip select
+        .web0   (~rx_udp_data_v ), // active low write control
+        .wmask0 (1'b1           ), // write mask (1 bit)
+        .addr0  (rx_addr        ), // addr (10 bit)
+        .din0   (rx_udp_data    ), // data in (8 bit)
+        .dout0  (dout0          ), // data out (8 bit)
+        // R
+        .clk1   (wb_clk_i       ), // clock
+        .csb1   (~wbs_stb_i     ), // active low chip select
+        .addr1  (wbs_adr_i[9:0] ), // addr (10 bit)
+        .dout1  (rx_mem_out     )  // data out (8 bit)
+    );
+
     always @(posedge RX_CLK) begin
         if(rst) begin
-            rx_addr         <= 11'h000;
+            rx_addr <= 10'h000;
         end else begin
             if(rx_udp_data_v) begin
-                rx_addr         <= rx_addr + 11'h001;
-                rx_mem[rx_addr] <= rx_udp_data;
+                rx_addr <= rx_addr + 10'h001;
             end else begin
-                rx_addr         <= 11'h000;
+                rx_addr <= 10'h000;
             end
         end
-    end
-    always @(posedge wb_clk_i) begin
-        rx_mem_out <= rx_mem[wbs_adr_i[10:0]];
     end
 
     // Wishbone logic
