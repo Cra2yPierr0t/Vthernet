@@ -4,7 +4,8 @@ module wb_interface #(
     parameter MY_MAC_ADDR_LOW   = 32'h3000_0000,
     parameter MY_MAC_ADDR_HIGH  = 32'h3000_0004,
     parameter MY_IP_ADDR        = 32'h3000_0008,
-    parameter MY_PORT           = 32'h3000_000c 
+    parameter MY_PORT           = 32'h3000_000c,
+    parameter RX_MEM_BASE       = 32'h4000_0000
 )(
     // Wishbone interface
     input   wire        wb_clk_i,
@@ -20,7 +21,12 @@ module wb_interface #(
     // CSRs
     output  reg [OCT*6-1:0] mac_addr = 48'h01005e0000fb,
     output  reg [OCT*4-1:0] ip_addr  = 32'he00000fb,
-    output  reg [OCT*2-1:0] port 
+    output  reg [OCT*2-1:0] port,
+    // RX Memory
+    input   wire            RX_CLK,
+    input   wire            rx_udp_data_v,
+    input   wire [OCT-1:0]  rx_udp_data,
+    input   wire [OCT-1:0]  rx_mem_out
 );
 
     // wishbone signal
@@ -95,6 +101,9 @@ module wb_interface #(
                             wbs_dat_o   <= ip_addr;
                         end
                         default     : begin
+                            if(wb_addr[31:12] == 20'h4000_0) begin
+                                wbs_dat_o <= rx_mem_out;
+                            end
                         end
                     endcase
                     wbs_ack_o   <= 1'b1;

@@ -52,13 +52,34 @@ module top(
     wire [OCT*4-1:0] rx_src_ip;
     wire [OCT*2-1:0] rx_src_port;
 
+    // RX Memory
+    reg [7:0]       rx_mem_out;
+    reg [10:0]      rx_addr;
+    reg [OCT-1:0]   rx_mem[1500-1:0];
+    always @(posedge RX_CLK) begin
+        if(rst) begin
+            rx_addr         <= 11'h000;
+        end else begin
+            if(rx_udp_data_v) begin
+                rx_addr         <= rx_addr + 11'h001;
+                rx_mem[rx_addr] <= rx_udp_data;
+            end else begin
+                rx_addr         <= 11'h000;
+            end
+        end
+    end
+    always @(posedge wb_clk_i) begin
+        rx_mem_out <= rx_mem[wb_adr_i[10:0]];
+    end
+
     // Wishbone logic
     wb_interface #(
         // CSRs addr
         .MY_MAC_ADDR_LOW    (32'h3000_0000),
         .MY_MAC_ADDR_HIGH   (32'h3000_0004),
         .MY_IP_ADDR         (32'h3000_0008),
-        .MY_PORT            (32'h3000_000c)
+        .MY_PORT            (32'h3000_000c),
+        .RX_MEM_BASE        (32'h4000_0000)
     ) wb_interface_inst(
         .wb_clk_i   (wb_clk_i   ),
         .wb_rst_i   (wb_rst_i   ),
@@ -73,7 +94,12 @@ module top(
         // CSRs
         .mac_addr   (mac_addr   ),
         .ip_addr    (ip_addr    ),
-        .port       (port       )
+        .port       (port       ),
+        // RX Memory
+        .RX_CLK     (RX_CLK     ),
+        .rx_udp_data_v  (rx_udp_data_v  ),
+        .rx_udp_data    (rx_udp_data    ),
+        .rx_mem_out (rx_mem_out )
     );
 
     // SMI logic
