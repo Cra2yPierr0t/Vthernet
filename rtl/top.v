@@ -69,7 +69,7 @@ module top(
         end
     end
     always @(posedge wb_clk_i) begin
-        rx_mem_out <= rx_mem[wb_adr_i[10:0]];
+        rx_mem_out <= rx_mem[wbs_adr_i[10:0]];
     end
 
     // Wishbone logic
