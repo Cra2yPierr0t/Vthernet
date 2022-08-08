@@ -40,7 +40,7 @@ module top(
     output  wire        rx_udp_data_v,
     output  wire [7:0]  rx_udp_data,
     input   wire [7:0]  rx_mem_out,
-    output  reg [10:0]  rx_addr,
+    output  reg [10:0]  rx_addr
     // write    : when web0 = 0, csb0 = 0
     // read     : when web0 = 1, csb0 = 0, maybe 3 clock delay...?
     // read     : when csb0 = 0, maybe 3 clock delay...?
