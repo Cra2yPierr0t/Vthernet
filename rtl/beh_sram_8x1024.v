@@ -25,7 +25,7 @@ module beh_sram_8x1024 #(
     reg [ADDR_WIDTH-1:0] addr0_r;
     reg [DATA_WIDTH-1:0] din0_r;
 
-    reg csb1;
+    reg csb1_r;
     reg [ADDR_WIDTH-1:0] addr1_r;
 
     always @(posedge clk0) begin

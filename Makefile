@@ -7,9 +7,12 @@ tb 	= $(tb_dir)receive_tb.cpp
 receive_test:
 	verilator --cc -Wno-lint --trace --top-module top $(rtl_dir)top.v $(rtl) --exe $(tb)
 	cd obj_dir; make -j -f Vtop.mk Vtop
-
-run:
 	./obj_dir/Vtop
+
+sram_test:
+	verilator --cc -Wno-lint --trace --top-module beh_sram_8x1024 $(rtl_dir)beh_sram_8x1024.v $(rtl) --exe $(tb_dir)sram_tb.cpp
+	cd obj_dir; make -j -f Vbeh_sram_8x1024.mk Vbeh_sram_8x1024
+	./obj_dir/Vbeh_sram_8x1024
 
 view: 
 	gtkwave wave.vcd
