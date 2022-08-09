@@ -41,6 +41,70 @@ int main(int argc, char **argv){
     top->rst = 0;
     top->RX_CLK = 0;
 
+    // CSR init
+    top->wb_clk_i   = 0;
+    top->wbs_stb_i  = 1;
+    top->wbs_cyc_i  = 1;
+    top->wbs_we_i   = 0;
+
+    {
+        // set offload func
+        top->wb_clk_i   = 0;
+        top->wbs_we_i   = 1;
+        top->wbs_adr_i  = 0x30000024;
+        top->wbs_dat_i  = 0x00000003;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        top->wb_clk_i   = 1;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        // set MAC
+        top->wb_clk_i   = 0;
+        top->wbs_we_i   = 1;
+        top->wbs_adr_i  = 0x30000000;
+        top->wbs_dat_i  = 0x5e0000fb;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        top->wb_clk_i   = 1;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        // set MAC
+        top->wb_clk_i   = 0;
+        top->wbs_we_i   = 1;
+        top->wbs_adr_i  = 0x30000004;
+        top->wbs_dat_i  = 0x00000100;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        top->wb_clk_i   = 1;
+
+        top->eval();
+        tfp->dump(main_time++);
+    }
+    for(int i = 0; i < 10; i++) {
+        top->wb_clk_i   = 0;
+        top->wbs_stb_i  = 0;
+        top->wbs_cyc_i  = 0;
+        top->wbs_we_i   = 0;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        top->wb_clk_i   = 1;
+
+        top->eval();
+        tfp->dump(main_time++);
+    }
+
     for(int i = 0; i < 10; i++) {
         top->RX_CLK = 0;
         top->RXD    = 0;
