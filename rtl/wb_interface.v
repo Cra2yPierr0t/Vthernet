@@ -9,6 +9,7 @@ module wb_interface #(
     parameter SRC_MAC_ADDR_HIGH = 32'h3000_0014,
     parameter SRC_IP_ADDR       = 32'h3000_001c,
     parameter SRC_PORT          = 32'h3000_0020,
+    parameter OFFLOAD_CSR       = 32'h3000_0024,
     parameter RX_MEM_BASE       = 32'h4000_0000
 )(
     // Wishbone interface
@@ -29,6 +30,7 @@ module wb_interface #(
     input   wire [OC*6-1:0] src_mac,
     input   wire [OCT*4-1:0] src_ip,
     input   wire [OCT*2-1:0] src_port,
+    output  reg [OCT*4-1:0] offload_csr,
     // RX Memory
     input   wire            RX_CLK,
     input   wire            rx_udp_data_v,
@@ -76,6 +78,9 @@ module wb_interface #(
                         end
                         MY_PORT     : begin
                             port        <= wb_w_data;
+                        end
+                        OFFLOAD_CSR : begin
+                            offload_CSR <= wb_w_data;
                         end
                         default     : begin
                         end

@@ -52,6 +52,8 @@ module top(
     parameter IPV4  = 16'h0800;
 
     // Vthernet CSR
+    wire [OCT*4-1:0] offload_csr;
+    
     wire [OCT*6-1:0] mac_addr;
     wire [OCT*4-1:0] ip_addr;
     wire [OCT*2-1:0] port;
@@ -85,6 +87,7 @@ module top(
         .SRC_MAC_ADDR_HIGH  (32'h3000_0014),
         .SRC_IP_ADDR        (32'h3000_001c),
         .SRC_PORT           (32'h3000_0020),
+        .OFFLOAD_CSR        (32'h3000_0024),
         .RX_MEM_BASE        (32'h4000_0000)
     ) wb_interface_inst(
         .wb_clk_i   (wb_clk_i   ),
@@ -104,6 +107,7 @@ module top(
         .src_mac    (rx_src_mac ),
         .src_ip     (rx_src_ip  ),
         .src_port   (rx_src_port),
+        .offload_csr(offload_csr),
         // RX Memory
         .RX_CLK     (RX_CLK     ),
         .rx_udp_data_v  (rx_udp_data_v  ),
@@ -146,6 +150,7 @@ module top(
     // IPv4
     rx_ipv4     rx_ipv4_inst(
         .rst            (rst            ),
+        .func_en        (offload_csr[0] ),
         .ip_addr        (ip_addr        ),
         .rx_src_ip      (rx_src_ip      ),
         .rx_ethernet_irq(rx_ethernet_irq),
@@ -160,6 +165,7 @@ module top(
     // UDP
     rx_udp      rx_udp_inst(
         .rst            (rst            ),
+        .func_en        (&offload_csr[1:0]),
         .port           (port           ),
         .rx_src_port    (rx_src_port    ),
         .rx_ipv4_irq    (rx_ipv4_irq    ),

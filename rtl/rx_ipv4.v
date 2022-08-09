@@ -4,6 +4,7 @@ module rx_ipv4 #(
     parameter   UDP = 8'h11
 )(
     input   wire                rst,
+    input   wire                func_en,
     input   wire    [OCT*4-1:0] ip_addr,
     output  reg     [OCT*4-1:0] rx_src_ip,
     input   wire                rx_ethernet_irq,
@@ -50,7 +51,7 @@ module rx_ipv4 #(
             rx_state    <= RX_IHL_VER;
             data_cnt    <= 16'h0000;
             rx_ipv4_irq <= 1'b0;
-        end else begin
+        end else if(func_en) begin
             rx_ipv4_irq <= rx_ethernet_irq;
             if(rx_payload_ipv4) begin
                 case(rx_state)
