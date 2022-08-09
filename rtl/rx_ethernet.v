@@ -7,9 +7,11 @@ module rx_ethernet #(
 )(
     input   wire        rst,
 
-    input   wire [OCT*6-1:0] mac_addr,
     output  reg             rx_ethernet_irq, // if completed receive frame, take interrupt
+    // CSRs
+    input   wire [OCT*6-1:0] mac_addr,
     output  reg [OCT*6-1:0] rx_src_mac,
+    output  reg [OCT*2-1:0] rx_len_type,
 
     // GMII Receive Interface
     input   wire            RX_CLK,
@@ -33,7 +35,6 @@ module rx_ethernet #(
     reg [OCT*2-1:0]     data_cnt;
     reg [2:0]           rx_state;
     reg [OCT*6-1:0]     rx_mac_dst;
-    reg [OCT*2-1:0]     rx_len_type;
 
     reg [1:0] detect_posedge_rx_dv;
 

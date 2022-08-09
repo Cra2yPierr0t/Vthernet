@@ -7,6 +7,15 @@ module rx_ipv4 #(
     input   wire                func_en,
     input   wire    [OCT*4-1:0] ip_addr,
     output  reg     [OCT*4-1:0] rx_src_ip,
+    output  reg     [3:0]       rx_version,
+    output  reg     [3:0]       rx_header_len,
+    output  reg     [OCT-1:0]   rx_tos,
+    output  reg     [OCT*2-1:0] rx_total_len,
+    output  reg     [OCT-1:0]   rx_id,
+    output  reg     [OCT*2-1:0] rx_flag_frag,
+    output  reg     [OCT-1:0]   rx_ttl,
+    output  reg     [OCT-1:0]   rx_protocol,
+    output  reg     [OCT-1:0]   rx_checksum,
     input   wire                rx_ethernet_irq,
     output  reg                 rx_ipv4_irq,
 
@@ -32,15 +41,6 @@ module rx_ipv4 #(
 
     reg [OCT-1:0]   rx_state;
 
-    reg [3:0]       rx_version;
-    reg [3:0]       rx_header_len;
-    reg [OCT-1:0]   rx_tos;
-    reg [OCT*2-1:0] rx_total_len;
-    reg [OCT-1:0]   rx_id;
-    reg [OCT*2-1:0] rx_flag_frag;
-    reg [OCT-1:0]   rx_ttl;
-    reg [OCT-1:0]   rx_protocol;
-    reg [OCT-1:0]   rx_checksum;
     reg [OCT*4-1:0] rx_dst_ip;
     //reg [OCT*36-1:0] rx_option;
     

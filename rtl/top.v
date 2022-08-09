@@ -62,6 +62,18 @@ module top(
     wire [OCT*4-1:0] rx_src_ip;
     wire [OCT*2-1:0] rx_src_port;
 
+    wire [OCT*2-1:0] rx_ethernet_len_type;
+
+    wire [3:0]       rx_ipv4_version;
+    wire [3:0]       rx_ipv4_header_len;
+    wire [OCT-1:0]   rx_ipv4_tos;
+    wire [OCT*2-1:0] rx_ipv4_total_len;
+    wire [OCT-1:0]   rx_ipv4_id;
+    wire [OCT*2-1:0] rx_ipv4_flag_frag;
+    wire [OCT-1:0]   rx_ipv4_ttl;
+    wire [OCT-1:0]   rx_ipv4_protocol;
+    wire [OCT-1:0]   rx_ipv4_checksum;
+
     // RX Memory logic
 
     always @(posedge RX_CLK) begin
@@ -88,6 +100,16 @@ module top(
         .SRC_IP_ADDR        (32'h3000_001c),
         .SRC_PORT           (32'h3000_0020),
         .OFFLOAD_CSR        (32'h3000_0024),
+        .RX_ETHERNET_LEN_TYPE (32'h3000_002c),
+        .RX_IPV4_VERSION    (32'h3000_0030),
+        .RX_IPV4_HEADER_LEN (32'h3000_0034),
+        .RX_IPV4_TOS        (32'h3000_0038),
+        .RX_IPV4_TOTAL_LEN  (32'h3000_003c),
+        .RX_IPV4_ID         (32'h3000_0040),
+        .RX_IPV4_FLAG_FRAG  (32'h3000_0044),
+        .RX_IPV4_TTL        (32'h3000_0048),
+        .RX_IPV4_PROTOCOL   (32'h3000_004c),
+        .RX_IPV4_CHECKSUM   (32'h3000_0050),
         .RX_MEM_BASE        (32'h4000_0000)
     ) wb_interface_inst(
         .wb_clk_i   (wb_clk_i   ),
@@ -101,13 +123,28 @@ module top(
         .wbs_ack_o  (wbs_ack_o  ),
         .wbs_dat_o  (wbs_dat_o  ),
         // CSRs
+        // Write Only
         .mac_addr   (mac_addr   ),
         .ip_addr    (ip_addr    ),
         .port       (port       ),
-        .src_mac    (rx_src_mac ),
-        .src_ip     (rx_src_ip  ),
-        .src_port   (rx_src_port),
         .offload_csr(offload_csr),
+        // Read Only
+        // Ethernet
+        .src_mac    (rx_src_mac ),
+        .rx_ethernet_len_type    (rx_ethernet_len_type   ),
+        // IPv4
+        .src_ip     (rx_src_ip  ),
+        .rx_ipv4_version    (rx_ipv4_version    ),
+        .rx_ipv4_header_len (rx_ipv4_header_len ),
+        .rx_ipv4_tos        (rx_ipv4_tos        ),
+        .rx_ipv4_total_len  (rx_ipv4_total_len  ),
+        .rx_ipv4_id         (rx_ipv4_id         ),
+        .rx_ipv4_flag_frag  (rx_ipv4_flag_frag  ),
+        .rx_ipv4_ttl        (rx_ipv4_ttl        ),
+        .rx_ipv4_protocol   (rx_ipv4_protocol   ),
+        .rx_ipv4_checksum   (rx_ipv4_checksum   ),
+        // UDP
+        .src_port   (rx_src_port),
         // RX Memory
         .RX_CLK     (RX_CLK     ),
         .rx_udp_data_v  (rx_udp_data_v  ),
@@ -149,6 +186,7 @@ module top(
         .mac_addr       (mac_addr   ),
         .rx_ethernet_irq(rx_ethernet_irq   ),
         .rx_src_mac     (rx_src_mac ),
+        .rx_len_type    (rx_ethernet_len_type   ),
         .RX_CLK         (RX_CLK     ),
         .RX_DV          (RX_DV      ),
         .RXD            (RXD        ),
@@ -163,6 +201,15 @@ module top(
         .func_en        (offload_csr[0] ),
         .ip_addr        (ip_addr        ),
         .rx_src_ip      (rx_src_ip      ),
+        .rx_version     (rx_ipv4_version    ),
+        .rx_header_len  (rx_ipv4_header_len ),
+        .rx_tos         (rx_ipv4_tos        ),
+        .rx_total_len   (rx_ipv4_total_len  ),
+        .rx_id          (rx_ipv4_id         ),
+        .rx_flag_frag   (rx_ipv4_flag_frag  ),
+        .rx_ttl         (rx_ipv4_ttl        ),
+        .rx_protocol    (rx_ipv4_protocol   ),
+        .rx_checksum    (rx_ipv4_checksum   ),
         .rx_ethernet_irq(rx_ethernet_irq),
         .rx_ipv4_irq    (rx_ipv4_irq    ),
         .RX_CLK         (RX_CLK         ),
