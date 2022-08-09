@@ -9,7 +9,7 @@ module rx_ethernet #(
 
     input   wire [OCT*6-1:0] mac_addr,
     output  reg             rx_ethernet_irq, // if completed receive frame, take interrupt
-    output  reg [OCT*6-1:0] rx_mac_src,
+    output  reg [OCT*6-1:0] rx_src_mac,
 
     // GMII Receive Interface
     input   wire            RX_CLK,
@@ -84,7 +84,7 @@ module rx_ethernet #(
                         rx_state    <= RX_MAC_SRC;
                         data_cnt    <= data_cnt + 16'h0001;
                     end
-                    rx_mac_src  <= {rx_mac_src[OCT*5-1:0], RXD};
+                    rx_src_mac  <= {rx_src_mac[OCT*5-1:0], RXD};
                 end
                 RX_LEN_TYPE : begin
                     if(data_cnt == 8'h01) begin
