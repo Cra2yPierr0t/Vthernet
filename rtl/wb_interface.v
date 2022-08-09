@@ -27,7 +27,7 @@ module wb_interface #(
     output  reg [OCT*6-1:0] mac_addr = 48'h01005e0000fb,
     output  reg [OCT*4-1:0] ip_addr  = 32'he00000fb,
     output  reg [OCT*2-1:0] port,
-    input   wire [OC*6-1:0] src_mac,
+    input   wire [OCT*6-1:0] src_mac,
     input   wire [OCT*4-1:0] src_ip,
     input   wire [OCT*2-1:0] src_port,
     output  reg [OCT*4-1:0] offload_csr,
@@ -80,7 +80,7 @@ module wb_interface #(
                             port        <= wb_w_data;
                         end
                         OFFLOAD_CSR : begin
-                            offload_CSR <= wb_w_data;
+                            offload_csr <= wb_w_data;
                         end
                         default     : begin
                         end
