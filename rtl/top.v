@@ -127,7 +127,9 @@ module top(
     wire                rx_ethernet_irq;
     wire                rx_ipv4_irq;
     wire                rx_udp_irq;
-    assign rx_irq = rx_udp_irq;
+    assign rx_irq = (&offload_csr[1:0]) ? rx_udp_irq : 
+                      offload_csr[0]    ? rx_ipv4_irq 
+                                        : rx_ethernet_irq;
 
     rx_ethernet #(
         .OCT    (OCT    ),
