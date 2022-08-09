@@ -56,7 +56,7 @@ module top(
     wire [OCT*4-1:0] ip_addr;
     wire [OCT*2-1:0] port;
 
-    wire [OCT*6-1:0] rx_mac_src;
+    wire [OCT*6-1:0] rx_src_mac;
     wire [OCT*4-1:0] rx_src_ip;
     wire [OCT*2-1:0] rx_src_port;
 
@@ -81,6 +81,10 @@ module top(
         .MY_MAC_ADDR_HIGH   (32'h3000_0004),
         .MY_IP_ADDR         (32'h3000_0008),
         .MY_PORT            (32'h3000_000c),
+        .SRC_MAC_ADDR_LOW   (32'h3000_0010),
+        .SRC_MAC_ADDR_HIGH  (32'h3000_0014),
+        .SRC_IP_ADDR        (32'h3000_001c),
+        .SRC_PORT           (32'h3000_0020),
         .RX_MEM_BASE        (32'h4000_0000)
     ) wb_interface_inst(
         .wb_clk_i   (wb_clk_i   ),
@@ -97,6 +101,9 @@ module top(
         .mac_addr   (mac_addr   ),
         .ip_addr    (ip_addr    ),
         .port       (port       ),
+        .src_mac    (rx_src_mac ),
+        .src_ip     (rx_src_ip  ),
+        .src_port   (rx_src_port),
         // RX Memory
         .RX_CLK     (RX_CLK     ),
         .rx_udp_data_v  (rx_udp_data_v  ),
@@ -127,7 +134,7 @@ module top(
         .rst            (rst        ),
         .mac_addr       (mac_addr   ),
         .rx_ethernet_irq(rx_ethernet_irq   ),
-        .rx_mac_src     (rx_mac_src ),
+        .rx_src_mac     (rx_src_mac ),
         .RX_CLK         (RX_CLK     ),
         .RX_DV          (RX_DV      ),
         .RXD            (RXD        ),
