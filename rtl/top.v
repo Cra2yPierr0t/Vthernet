@@ -37,8 +37,8 @@ module top(
     output  wire        rx_irq,
 
     // Memory interface
-    output  wire        rx_udp_data_v,
-    output  wire [7:0]  rx_udp_data,
+    output  wire        rx_data_v,
+    output  wire [7:0]  rx_data,
     input   wire [7:0]  rx_mem_out,
     output  reg [10:0]  rx_addr
     // write    : when web0 = 0, csb0 = 0
@@ -118,10 +118,12 @@ module top(
     // SMI logic
     // transmit logic
     // receive logic
-    wire                rx_payload_ipv4;
-    wire    [OCT-1:0]   rx_payload;
-    wire                rx_data_udp;
-    wire    [OCT-1:0]   rx_data;
+    wire                rx_ethernet_data_v;
+    wire    [OCT-1:0]   rx_ethernet_data;
+    wire                rx_ipv4_data_v;
+    wire    [OCT-1:0]   rx_ipv4_data;
+    wire                rx_udp_data_v;
+    wire    [OCT-1:0]   rx_udp_data;
 
     // receive irq signal
     wire                rx_ethernet_irq;
@@ -130,6 +132,12 @@ module top(
     assign rx_irq = (&offload_csr[1:0]) ? rx_udp_irq : 
                       offload_csr[0]    ? rx_ipv4_irq 
                                         : rx_ethernet_irq;
+    assign rx_data_v = (&offload_csr[1:0]) ? rx_udp_data_v :
+                         offload_csr[0]    ? rx_ipv4_data_v
+                                           : rx_ethernet_data_v;
+    assign rx_data  = (&offload_csr[1:0]) ? rx_udp_data :
+                         offload_csr[0]   ? rx_ipv4_data
+                                          : rx_ethernet_data;
 
     rx_ethernet #(
         .OCT    (OCT    ),
@@ -145,8 +153,8 @@ module top(
         .RX_DV          (RX_DV      ),
         .RXD            (RXD        ),
         .RX_ER          (RX_ER      ),
-        .rx_payload_ipv4(rx_payload_ipv4    ),
-        .rx_payload     (rx_payload         )
+        .rx_ethernet_data_v (rx_ethernet_data_v ),
+        .rx_ethernet_data   (rx_ethernet_data   )
     );
 
     // IPv4
@@ -158,10 +166,10 @@ module top(
         .rx_ethernet_irq(rx_ethernet_irq),
         .rx_ipv4_irq    (rx_ipv4_irq    ),
         .RX_CLK         (RX_CLK         ),
-        .rx_payload_ipv4(rx_payload_ipv4),
-        .rx_payload     (rx_payload     ),
-        .rx_data_udp    (rx_data_udp    ),
-        .rx_data        (rx_data        )
+        .rx_ethernet_data_v (rx_ethernet_data_v ),
+        .rx_ethernet_data   (rx_ethernet_data   ),
+        .rx_ipv4_data_v (rx_ipv4_data_v ),
+        .rx_ipv4_data   (rx_ipv4_data   )
     );
 
     // UDP
@@ -173,8 +181,8 @@ module top(
         .rx_ipv4_irq    (rx_ipv4_irq    ),
         .rx_udp_irq     (rx_udp_irq     ),
         .RX_CLK         (RX_CLK         ),
-        .rx_data_v      (rx_data_udp    ),
-        .rx_data        (rx_data        ),
+        .rx_ipv4_data_v (rx_ipv4_data_v ),
+        .rx_ipv4_data   (rx_ipv4_data   ),
         .rx_udp_data_v  (rx_udp_data_v  ),
         .rx_udp_data    (rx_udp_data    )
     );

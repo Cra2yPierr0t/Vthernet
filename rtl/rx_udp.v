@@ -10,8 +10,8 @@ module rx_udp #(
     output  reg                 rx_udp_irq,
 
     input   wire                RX_CLK,
-    input   wire                rx_data_v,
-    input   wire    [OCT-1:0]   rx_data,
+    input   wire                rx_ipv4_data_v,
+    input   wire    [OCT-1:0]   rx_ipv4_data,
 
     output  reg                 rx_udp_data_v,
     output  reg     [OCT-1:0]   rx_udp_data
@@ -38,7 +38,7 @@ module rx_udp #(
             rx_udp_irq  <= 1'b0;
         end else if (func_en) begin
             rx_udp_irq  <= rx_ipv4_irq;
-            if(rx_data_v) begin
+            if(rx_ipv4_data_v) begin
                 case(rx_state)
                     SRC_PORT : begin
                         if(data_cnt == 16'h0001) begin
@@ -48,7 +48,7 @@ module rx_udp #(
                             rx_state    <= SRC_PORT;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_src_port <= {rx_src_port[OCT-1:0], rx_data};
+                        rx_src_port <= {rx_src_port[OCT-1:0], rx_ipv4_data};
                     end
                     DST_PORT : begin
                         if(data_cnt == 16'h0001) begin
@@ -58,7 +58,7 @@ module rx_udp #(
                             rx_state    <= DST_PORT;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_dst_port <= {rx_dst_port[OCT-1:0], rx_data};
+                        rx_dst_port <= {rx_dst_port[OCT-1:0], rx_ipv4_data};
                     end
                     DATA_LEN : begin
                         if(data_cnt == 16'h0001) begin
@@ -68,7 +68,7 @@ module rx_udp #(
                             rx_state    <= DATA_LEN;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_data_len <= {rx_data_len[OCT-1:0], rx_data};
+                        rx_data_len <= {rx_data_len[OCT-1:0], rx_ipv4_data};
                     end
                     CHECKSUM : begin
                         if(data_cnt == 16'h0001) begin
@@ -78,7 +78,7 @@ module rx_udp #(
                             rx_state    <= CHECKSUM;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_checksum <= {rx_checksum[OCT-1:0], rx_data};
+                        rx_checksum <= {rx_checksum[OCT-1:0], rx_ipv4_data};
                     end
                     UDP_DATA : begin
                         if(data_cnt == rx_data_len) begin
@@ -88,7 +88,7 @@ module rx_udp #(
                             rx_udp_data_v   <= 1'b1;
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_udp_data     <= rx_data;
+                        rx_udp_data     <= rx_ipv4_data;
                     end
                 endcase
             end else begin
