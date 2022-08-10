@@ -10,8 +10,8 @@ module top (
     input   wire  [3:0] wbs_sel_i,
     input   wire [31:0] wbs_dat_i,
     input   wire [31:0] wbs_adr_i,
-    output  reg         wbs_ack_o,
-    output  reg  [31:0] wbs_dat_o,
+    output  wire        wbs_ack_o,
+    output  wire [31:0] wbs_dat_o,
 
     // GMII interface
     output  reg         GTX_CLK,
