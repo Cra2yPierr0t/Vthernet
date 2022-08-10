@@ -40,7 +40,7 @@ module RX_Vthernet_MAC (
     output  wire        rx_data_v,
     output  wire [7:0]  rx_data,
     input   wire [7:0]  rx_mem_out,
-    output  reg [10:0]  rx_addr
+    output  reg [31:0]  rx_addr
     // write    : when web0 = 0, csb0 = 0
     // read     : when web0 = 1, csb0 = 0, maybe 3 clock delay...?
     // read     : when csb0 = 0, maybe 3 clock delay...?
@@ -78,12 +78,12 @@ module RX_Vthernet_MAC (
 
     always @(posedge RX_CLK) begin
         if(rst) begin
-            rx_addr <= 10'h000;
+            rx_addr <= 32'h0000_0000;
         end else begin
             if(rx_data_v) begin
-                rx_addr <= rx_addr + 10'h001;
+                rx_addr <= rx_addr + 32'h0000_0001;
             end else begin
-                rx_addr <= 10'h000;
+                rx_addr <= 32'h0000_0000;
             end
         end
     end

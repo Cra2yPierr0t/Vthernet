@@ -34,7 +34,7 @@ module top (
     wire        rx_data_v;
     wire [7:0]  rx_data;
     wire [7:0]  rx_mem_out;
-    wire [10:0] rx_addr;
+    wire [31:0] rx_addr;
 
     RX_Vthernet_MAC RX_Vthernet_MAC(
         .rst        (wb_rst_i   ),
@@ -69,13 +69,21 @@ module top (
         .rx_addr    (rx_addr    )
     );
 
+    wire [3:0] csb0;
+    wire [9:0] addr0;
+    sram_addr_converter sram_addr_converter(
+        .addr_in    (rx_addr),
+        .csb        (csb0   ),
+        .addr_out   (addr0  )
+    );
+
     beh_sram_8x1024 sram_inst0(
         // RW
         .clk0   (RX_CLK         ), // clock
-        .csb0   (~rx_data_v     ), // active low chip select
+        .csb0   (csb0[0]        ), // active low chip select
         .web0   (~rx_data_v     ), // active low write control
         .wmask0 (1'b1           ), // write mask (1 bit)
-        .addr0  (rx_addr        ), // addr (10 bit)
+        .addr0  (addr0          ), // addr (10 bit)
         .din0   (rx_data        ), // data in (8 bit)
         .dout0  (), // data out (8 bit)
         // R
@@ -85,5 +93,52 @@ module top (
         .dout1  (rx_mem_out     )  // data out (8 bit)
     );
 
+    beh_sram_8x1024 sram_inst1(
+        // RW
+        .clk0   (RX_CLK         ), // clock
+        .csb0   (csb0[1]        ), // active low chip select
+        .web0   (~rx_data_v     ), // active low write control
+        .wmask0 (1'b1           ), // write mask (1 bit)
+        .addr0  (addr0          ), // addr (10 bit)
+        .din0   (rx_data        ), // data in (8 bit)
+        .dout0  (), // data out (8 bit)
+        // R
+        .clk1   (wb_clk_i       ), // clock
+        .csb1   (), // active low chip select
+        .addr1  (), // addr (10 bit)
+        .dout1  ()  // data out (8 bit)
+    );
+
+    beh_sram_8x1024 sram_inst2(
+        // RW
+        .clk0   (RX_CLK         ), // clock
+        .csb0   (csb0[2]        ), // active low chip select
+        .web0   (~rx_data_v     ), // active low write control
+        .wmask0 (1'b1           ), // write mask (1 bit)
+        .addr0  (addr0          ), // addr (10 bit)
+        .din0   (rx_data        ), // data in (8 bit)
+        .dout0  (), // data out (8 bit)
+        // R
+        .clk1   (wb_clk_i       ), // clock
+        .csb1   (), // active low chip select
+        .addr1  (), // addr (10 bit)
+        .dout1  ()  // data out (8 bit)
+    );
+
+    beh_sram_8x1024 sram_inst3(
+        // RW
+        .clk0   (RX_CLK         ), // clock
+        .csb0   (csb0[3]        ), // active low chip select
+        .web0   (~rx_data_v     ), // active low write control
+        .wmask0 (1'b1           ), // write mask (1 bit)
+        .addr0  (addr0          ), // addr (10 bit)
+        .din0   (rx_data        ), // data in (8 bit)
+        .dout0  (), // data out (8 bit)
+        // R
+        .clk1   (wb_clk_i       ), // clock
+        .csb1   (), // active low chip select
+        .addr1  (), // addr (10 bit)
+        .dout1  ()  // data out (8 bit)
+    );
 endmodule
 `default_nettype wire
