@@ -80,7 +80,7 @@ module top(
         if(rst) begin
             rx_addr <= 10'h000;
         end else begin
-            if(rx_udp_data_v) begin
+            if(rx_data_v) begin
                 rx_addr <= rx_addr + 10'h001;
             end else begin
                 rx_addr <= 10'h000;
