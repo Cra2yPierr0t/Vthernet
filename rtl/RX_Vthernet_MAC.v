@@ -5,7 +5,7 @@
 //
 
 `default_nettype none
-module top(
+module RX_Vthernet_MAC (
     input   wire        rst,
     // Wishbone interface
     input   wire        wb_clk_i,

@@ -5,7 +5,7 @@ rtl	= $(rtl_dir)rx_ethernet.v $(rtl_dir)rx_ipv4.v $(rtl_dir)rx_udp.v $(rtl_dir)w
 tb 	= $(tb_dir)receive_tb.cpp
 
 receive_test:
-	verilator --cc -Wno-lint --trace --top-module top $(rtl_dir)top.v $(rtl) --exe $(tb)
+	verilator --cc -Wno-lint --trace --top-module RX_Vthernet_MAC $(rtl_dir)RX_Vthernet_MAC.v $(rtl) --exe $(tb)
 	cd obj_dir; make -j -f Vtop.mk Vtop
 	./obj_dir/Vtop
 
