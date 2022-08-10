@@ -192,22 +192,26 @@ int main(int argc, char **argv){
     top->wbs_cyc_i  = 1;
     top->wbs_we_i   = 0;
 
-    for(uint32_t i = 0; i < 30; i++) {
-        top->wb_clk_i   = 0;
-        top->wbs_adr_i  = 0x40000000 + i;
-
-        top->eval();
-        tfp->dump(main_time++);
-
+    for(uint32_t i = 0; i < 30;) {
         top->wb_clk_i   = 1;
         top->wbs_adr_i  = 0x40000000 + i;
 
         top->eval();
         tfp->dump(main_time++);
+
+        top->wb_clk_i   = 0;
+        top->wbs_adr_i  = 0x40000000 + i;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        if(top->wbs_ack_o == 1) {
+            i++;
+        }
     }
 
     for(int i = 0; i < 10; i++) {
-        top->wb_clk_i   = 0;
+        top->wb_clk_i   = 1;
         top->wbs_stb_i  = 0;
         top->wbs_cyc_i  = 0;
         top->wbs_we_i   = 0;
@@ -215,7 +219,7 @@ int main(int argc, char **argv){
         top->eval();
         tfp->dump(main_time++);
 
-        top->wb_clk_i   = 1;
+        top->wb_clk_i   = 0;
 
         top->eval();
         tfp->dump(main_time++);
