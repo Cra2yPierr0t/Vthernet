@@ -89,6 +89,20 @@ int main(int argc, char **argv){
 
         top->eval();
         tfp->dump(main_time++);
+
+        // set IP
+        top->wb_clk_i   = 0;
+        top->wbs_we_i   = 1;
+        top->wbs_adr_i  = 0x30000008;
+        top->wbs_dat_i  = 0xe00000fb;
+
+        top->eval();
+        tfp->dump(main_time++);
+
+        top->wb_clk_i   = 1;
+
+        top->eval();
+        tfp->dump(main_time++);
     }
     for(int i = 0; i < 10; i++) {
         top->wb_clk_i   = 0;

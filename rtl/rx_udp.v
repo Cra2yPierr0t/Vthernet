@@ -31,71 +31,76 @@ module rx_udp #(
     reg [OCT*2-1:0] rx_data_len;
     reg [OCT*2-1:0] rx_checksum;
 
+    reg rx_ipv4_data_vp;
+
     always @(posedge RX_CLK) begin
         if(rst) begin
             data_cnt    <= 16'h0000;
+            rx_ipv4_data_vp <= 1'b0;
             rx_udp_data_v   <= 1'b0;
             rx_udp_irq  <= 1'b0;
         end else if (func_en) begin
             rx_udp_irq  <= rx_ipv4_irq;
-            if(rx_ipv4_data_v) begin
-                case(rx_state)
-                    SRC_PORT : begin
-                        if(data_cnt == 16'h0001) begin
-                            rx_state    <= DST_PORT;
-                            data_cnt    <= 16'h0000;
-                        end else begin
-                            rx_state    <= SRC_PORT;
+            rx_ipv4_data_vp <= rx_ipv4_data_v;
+            case(rx_state)
+                SRC_PORT : begin
+                    if(data_cnt == 16'h0001) begin
+                        rx_state    <= DST_PORT;
+                        data_cnt    <= 16'h0000;
+                    end else begin
+                        if({rx_ipv4_data_vp, rx_ipv4_data_v} == 2'b01) begin
                             data_cnt    <= data_cnt + 16'h0001;
                         end
-                        rx_src_port <= {rx_src_port[OCT-1:0], rx_ipv4_data};
+                        rx_state    <= SRC_PORT;
                     end
-                    DST_PORT : begin
-                        if(data_cnt == 16'h0001) begin
-                            rx_state    <= DATA_LEN;
-                            data_cnt    <= 16'h0000;
-                        end else begin
-                            rx_state    <= DST_PORT;
-                            data_cnt    <= data_cnt + 16'h0001;
-                        end
-                        rx_dst_port <= {rx_dst_port[OCT-1:0], rx_ipv4_data};
+                    rx_src_port <= {rx_src_port[OCT-1:0], rx_ipv4_data};
+                end
+                DST_PORT : begin
+                    if(data_cnt == 16'h0001) begin
+                        rx_state    <= DATA_LEN;
+                        data_cnt    <= 16'h0000;
+                    end else begin
+                        rx_state    <= DST_PORT;
+                        data_cnt    <= data_cnt + 16'h0001;
                     end
-                    DATA_LEN : begin
-                        if(data_cnt == 16'h0001) begin
-                            rx_state    <= CHECKSUM;
-                            data_cnt    <= 16'h0000;
-                        end else begin
-                            rx_state    <= DATA_LEN;
-                            data_cnt    <= data_cnt + 16'h0001;
-                        end
-                        rx_data_len <= {rx_data_len[OCT-1:0], rx_ipv4_data};
+                    rx_dst_port <= {rx_dst_port[OCT-1:0], rx_ipv4_data};
+                end
+                DATA_LEN : begin
+                    if(data_cnt == 16'h0001) begin
+                        rx_state    <= CHECKSUM;
+                        data_cnt    <= 16'h0000;
+                    end else begin
+                        rx_state    <= DATA_LEN;
+                        data_cnt    <= data_cnt + 16'h0001;
                     end
-                    CHECKSUM : begin
-                        if(data_cnt == 16'h0001) begin
-                            rx_state    <= UDP_DATA;
-                            data_cnt    <= 16'h0008;
-                        end else begin
-                            rx_state    <= CHECKSUM;
-                            data_cnt    <= data_cnt + 16'h0001;
-                        end
-                        rx_checksum <= {rx_checksum[OCT-1:0], rx_ipv4_data};
+                    rx_data_len <= {rx_data_len[OCT-1:0], rx_ipv4_data};
+                end
+                CHECKSUM : begin
+                    if(data_cnt == 16'h0001) begin
+                        rx_state    <= UDP_DATA;
+                        data_cnt    <= 16'h0008;
+                    end else begin
+                        rx_state    <= CHECKSUM;
+                        data_cnt    <= data_cnt + 16'h0001;
                     end
-                    UDP_DATA : begin
-                        if(data_cnt == rx_data_len) begin
-                            rx_udp_data_v   <= 1'b0;
-                            data_cnt    <= 16'h0000;
-                        end else begin
-                            rx_udp_data_v   <= 1'b1;
-                            data_cnt    <= data_cnt + 16'h0001;
-                        end
-                        rx_udp_data     <= rx_ipv4_data;
+                    rx_checksum <= {rx_checksum[OCT-1:0], rx_ipv4_data};
+                end
+                UDP_DATA : begin
+                    if(data_cnt == rx_data_len) begin
+                        data_cnt    <= 16'h0000;
+                    end else begin
+                        data_cnt    <= data_cnt + 16'h0001;
                     end
-                endcase
-            end else begin
-                rx_state        <= SRC_PORT;
-                rx_udp_data_v   <= 1'b0;
-                data_cnt        <= 16'h0000;
-            end
+                    if(rx_ipv4_data_v) begin
+                        rx_state    <= UDP_DATA;
+                        rx_udp_data_v   <= 1'b1;
+                    end else begin
+                        rx_state    <= SRC_PORT;
+                        rx_udp_data_v   <= 1'b0;
+                    end
+                    rx_udp_data     <= rx_ipv4_data;
+                end
+            endcase
         end
     end
 endmodule

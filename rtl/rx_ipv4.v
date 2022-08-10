@@ -45,112 +45,124 @@ module rx_ipv4 #(
     //reg [OCT*36-1:0] rx_option;
     
     reg [OCT-1:0]   data_cnt;
+    reg rx_ethernet_data_vp;
 
     always @(posedge RX_CLK) begin 
         if(rst) begin
             rx_state    <= RX_IHL_VER;
             data_cnt    <= 16'h0000;
             rx_ipv4_irq <= 1'b0;
+            rx_ethernet_data_vp <= 1'b0;
         end else if(func_en) begin
             rx_ipv4_irq <= rx_ethernet_irq;
-            if(rx_ethernet_data_v) begin
-                case(rx_state)
-                    RX_IHL_VER  : begin
+            rx_ethernet_data_vp <= rx_ethernet_data_v;
+            case(rx_state)
+                RX_IHL_VER  : begin
+                    if({rx_ethernet_data_vp, rx_ethernet_data_v} == 2'b01) begin
                         rx_state    <= RX_TOS;
                         {rx_version, rx_header_len} <= rx_ethernet_data;
+                    end else begin
+                        rx_state <= RX_IHL_VER;
                     end
-                    RX_TOS      : begin
+                end
+                RX_TOS      : begin
+                    rx_state    <= RX_TOTAL_LEN;
+                    rx_tos      <= rx_ethernet_data;
+                end
+                RX_TOTAL_LEN: begin
+                    if(data_cnt == 16'h0001) begin
+                        rx_state    <= RX_ID;
+                        data_cnt    <= 16'h0000;
+                    end else begin
                         rx_state    <= RX_TOTAL_LEN;
-                        rx_tos      <= rx_ethernet_data;
+                        data_cnt    <= data_cnt + 16'h0001;
                     end
-                    RX_TOTAL_LEN: begin
-                        if(data_cnt == 16'h0001) begin
-                            rx_state    <= RX_ID;
-                            data_cnt    <= 16'h0000;
-                        end else begin
-                            rx_state    <= RX_TOTAL_LEN;
-                            data_cnt    <= data_cnt + 16'h0001;
-                        end
-                        rx_total_len <= {rx_total_len[OCT-1:0], rx_ethernet_data};
+                    rx_total_len <= {rx_total_len[OCT-1:0], rx_ethernet_data};
+                end
+                RX_ID       : begin
+                    if(data_cnt == 16'h0001) begin
+                        rx_state    <= RX_FLAG_FRAG;
+                        data_cnt    <= 16'h0000;
+                    end else begin
+                        rx_state    <= RX_ID;
+                        data_cnt    <= data_cnt + 16'h0001;
                     end
-                    RX_ID       : begin
-                        if(data_cnt == 16'h0001) begin
-                            rx_state    <= RX_FLAG_FRAG;
-                            data_cnt    <= 16'h0000;
-                        end else begin
-                            rx_state    <= RX_ID;
-                            data_cnt    <= data_cnt + 16'h0001;
-                        end
-                        rx_id <= {rx_id[OCT-1:0], rx_ethernet_data};
+                    rx_id <= {rx_id[OCT-1:0], rx_ethernet_data};
+                end
+                RX_FLAG_FRAG: begin
+                    if(data_cnt == 16'h0001) begin
+                        rx_state    <= RX_TTL;
+                        data_cnt    <= 16'h0000;
+                    end else begin
+                        rx_state    <= RX_FLAG_FRAG;
+                        data_cnt    <= data_cnt + 16'h0001;
                     end
-                    RX_FLAG_FRAG: begin
-                        if(data_cnt == 16'h0001) begin
-                            rx_state    <= RX_TTL;
-                            data_cnt    <= 16'h0000;
-                        end else begin
-                            rx_state    <= RX_FLAG_FRAG;
-                            data_cnt    <= data_cnt + 16'h0001;
-                        end
-                        rx_flag_frag <= {rx_flag_frag[OCT-1:0], rx_ethernet_data};
-                    end
-                    RX_TTL      : begin
-                        rx_state    <= RX_PROTOCOL;
-                        rx_ttl      <= rx_ethernet_data;
-                    end
-                    RX_PROTOCOL : begin
+                    rx_flag_frag <= {rx_flag_frag[OCT-1:0], rx_ethernet_data};
+                end
+                RX_TTL      : begin
+                    rx_state    <= RX_PROTOCOL;
+                    rx_ttl      <= rx_ethernet_data;
+                end
+                RX_PROTOCOL : begin
+                    rx_state    <= RX_CHECKSUM;
+                    rx_protocol <= rx_ethernet_data;
+                end
+                RX_CHECKSUM : begin
+                    if(data_cnt == 16'h0001) begin
+                        rx_state    <= RX_SRC_IP;
+                        data_cnt    <= 16'h0000;
+                    end else begin
                         rx_state    <= RX_CHECKSUM;
-                        rx_protocol <= rx_ethernet_data;
+                        data_cnt    <= data_cnt + 16'h0001;
                     end
-                    RX_CHECKSUM : begin
-                        if(data_cnt == 16'h0001) begin
-                            rx_state    <= RX_SRC_IP;
-                            data_cnt    <= 16'h0000;
-                        end else begin
-                            rx_state    <= RX_CHECKSUM;
-                            data_cnt    <= data_cnt + 16'h0001;
-                        end
-                        rx_checksum <= {rx_checksum[OCT-1:0], rx_ethernet_data};
+                    rx_checksum <= {rx_checksum[OCT-1:0], rx_ethernet_data};
+                end
+                RX_SRC_IP   : begin
+                    if(data_cnt == 16'h0003) begin
+                        rx_state    <= RX_DST_IP;
+                        data_cnt    <= 16'h0000;
+                    end else begin
+                        rx_state    <= RX_SRC_IP;
+                        data_cnt    <= data_cnt + 16'h0001;
                     end
-                    RX_SRC_IP   : begin
-                        if(data_cnt == 16'h0003) begin
-                            rx_state    <= RX_DST_IP;
-                            data_cnt    <= 16'h0000;
-                        end else begin
-                            rx_state    <= RX_SRC_IP;
-                            data_cnt    <= data_cnt + 16'h0001;
-                        end
-                        rx_src_ip <= {rx_src_ip[OCT*3-1:0], rx_ethernet_data};
-                    end
-                    RX_DST_IP   : begin
-                        if(data_cnt == 16'h0003) begin
+                    rx_src_ip <= {rx_src_ip[OCT*3-1:0], rx_ethernet_data};
+                end
+                RX_DST_IP   : begin
+                    if(data_cnt == 16'h0003) begin
+                        if({rx_dst_ip[OCT*3-1:0], rx_ethernet_data} == ip_addr) begin
                             rx_state    <= RX_DATA;
-                            // for total len cnt
-                            data_cnt    <= {10'b00_0000_0000, rx_header_len, 2'b00};
                         end else begin
-                            rx_state    <= RX_DST_IP;
-                            data_cnt    <= data_cnt + 16'h0001;
+                            rx_state    <= RX_IHL_VER;
                         end
-                        rx_dst_ip <= {rx_dst_ip[OCT*3-1:0], rx_ethernet_data};
+                        // for total len cnt
+                        data_cnt    <= {10'b00_0000_0000, rx_header_len, 2'b00};
+                    end else begin
+                        rx_state    <= RX_DST_IP;
+                        data_cnt    <= data_cnt + 16'h0001;
                     end
-                    RX_DATA     : begin
-                        rx_ipv4_data <= rx_ethernet_data;
-                        // count data lenght
-                        case(rx_protocol)
-                            UDP : begin
-                                rx_ipv4_data_v <= 1'b1;
-                            end
-                            default : begin
-                                rx_ipv4_data_v <= 1'b0;
-                            end
-                        endcase
-                    end
-                    default : begin
+                    rx_dst_ip <= {rx_dst_ip[OCT*3-1:0], rx_ethernet_data};
+                end
+                RX_DATA     : begin
+                    if(rx_ethernet_data_v) begin
+                        rx_state <= RX_DATA;
+                        rx_ipv4_data_v <= 1'b1;
+                    end else begin
+                        rx_state <= RX_IHL_VER;
                         rx_ipv4_data_v <= 1'b0;
                     end
-                endcase
-            end else begin
-                rx_ipv4_data_v <= 1'b0;
-            end
+                    rx_ipv4_data <= rx_ethernet_data;
+                    // count data lenght
+                    case(rx_protocol)
+                        UDP : begin
+                        end
+                        default : begin
+                        end
+                    endcase
+                end
+                default : begin
+                    rx_ipv4_data_v <= 1'b0;
+                end
+            endcase
         end
     end
 endmodule
