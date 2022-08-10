@@ -77,7 +77,7 @@ module top (
         .addr_out   (addr0  )
     );
 
-    beh_sram_8x1024 sram_inst0(
+    beh_sram_8x1024 rx_sram_inst0(
         // RW
         .clk0   (RX_CLK         ), // clock
         .csb0   (csb0[0]        ), // active low chip select
@@ -93,7 +93,7 @@ module top (
         .dout1  (rx_mem_out     )  // data out (8 bit)
     );
 
-    beh_sram_8x1024 sram_inst1(
+    beh_sram_8x1024 rx_sram_inst1(
         // RW
         .clk0   (RX_CLK         ), // clock
         .csb0   (csb0[1]        ), // active low chip select
@@ -109,7 +109,7 @@ module top (
         .dout1  ()  // data out (8 bit)
     );
 
-    beh_sram_8x1024 sram_inst2(
+    beh_sram_8x1024 rx_sram_inst2(
         // RW
         .clk0   (RX_CLK         ), // clock
         .csb0   (csb0[2]        ), // active low chip select
@@ -125,7 +125,7 @@ module top (
         .dout1  ()  // data out (8 bit)
     );
 
-    beh_sram_8x1024 sram_inst3(
+    beh_sram_8x1024 rx_sram_inst3(
         // RW
         .clk0   (RX_CLK         ), // clock
         .csb0   (csb0[3]        ), // active low chip select

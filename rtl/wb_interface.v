@@ -68,10 +68,14 @@ module wb_interface #(
     reg [31:0]  wb_addr;
     reg [31:0]  wb_w_data;
 
+    // For sky130 sram
+    reg wait_one_cycle_for_read;
+
     always @(posedge wb_clk_i) begin
         if(wb_rst_i) begin
             wb_state    <= WB_IDLE;
             wbs_ack_o   <= 1'b0;
+            wait_one_cycle_for_read <= 1'b0;
         end else begin
             case(wb_state)
                 WB_IDLE : begin
@@ -85,6 +89,7 @@ module wb_interface #(
                         wb_addr <= wbs_adr_i;
                     end
                     wbs_ack_o   <= 1'b0;
+                    wait_one_cycle_for_read <= 1'b0;
                 end
                 WB_WRITE: begin
                     case(wb_addr)
@@ -159,8 +164,14 @@ module wb_interface #(
                             end
                         end
                     endcase
-                    wbs_ack_o   <= 1'b1;
-                    if(wbs_stb_i && wbs_cyc_i) begin
+                    // We need to wait 1 cycle to get valid data from sky130 sram.
+                    if((wb_addr[31:12] == 20'h4000_0) && (wait_one_cycle_for_read == 1'b0)) begin
+                        wait_one_cycle_for_read <= 1'b1;
+                        wbs_ack_o   <= 1'b0;
+                        wb_state <= WB_READ;
+                    end else if(wbs_stb_i && wbs_cyc_i) begin
+                        wait_one_cycle_for_read <= 1'b0;
+                        wbs_ack_o   <= 1'b1;
                         if(wbs_we_i) begin
                             wb_state    <= WB_WRITE;
                             wb_w_data   <= wbs_dat_i;
