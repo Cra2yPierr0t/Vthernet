@@ -13,7 +13,7 @@ module sky130_sram_1kbyte_1rw1r_8x1024_8_tb;
     reg [9:0] addr1;
     wire [7:0] dout1;
 
-    always #1 begin
+    always #100 begin
         clk0 = ~clk0;
     end
 
@@ -43,43 +43,43 @@ module sky130_sram_1kbyte_1rw1r_8x1024_8_tb;
         wmask0 = 1'b1;
         addr0 = 10'b00_0000_1010;
         din0 = 8'h55;
-        #2
+        #200
         csb0 = 1'b0;
         web0 = 1'b0;
         wmask0 = 1'b1;
         addr0 = 10'b00_0000_1011;
         din0 = 8'h44;
-        #2
+        #200
         csb0 = 1'b0;
         web0 = 1'b0;
         wmask0 = 1'b1;
         addr0 = 10'b00_0000_1100;
         din0 = 8'h33;
-        #2
+        #200
         csb0 = 1'b0;
         web0 = 1'b1;
         wmask0 = 1'b1;
         addr0 = 10'b00_0000_0000;
         din0 = 8'h00;
-        #8
+        #800
         csb0 = 1'b0;
         web0 = 1'b1;
         wmask0 = 1'b1;
         addr0 = 10'b00_0000_1010;
         din0 = 8'h00;
-        #2
+        #200
         csb0 = 1'b0;
         web0 = 1'b1;
         wmask0 = 1'b1;
         addr0 = 10'b00_0000_1011;
         din0 = 8'h00;
-        #2
+        #200
         csb0 = 1'b0;
         web0 = 1'b1;
         wmask0 = 1'b1;
         addr0 = 10'b00_0000_1100;
         din0 = 8'h00;
-        #10
+        #1000
         $finish;
     end
 endmodule
